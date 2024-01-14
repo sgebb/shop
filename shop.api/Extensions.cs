@@ -13,7 +13,7 @@ public static class Extensions
 
         foreach(var e in events)
         {
-            current = e.Apply(current);
+            current = e.On(current);
             yield return current;
         }
     }

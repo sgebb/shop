@@ -1,7 +1,7 @@
 
 1 - battery
 minimal setup for event sourcing. Events som kan bli til domainobject, dtos mappes til events
-lagre ting in-memory. GET / POST / PATCH.
+lagre ting in-memory. GET / POST / PUT.
 
 2 - behov for lesemodeller og implementasjon av lesemodeller?
 

@@ -10,11 +10,11 @@ public record CreateFruitEvent(Guid FruitId, string Name, string Color) : Event<
     }
 }
 
-public record UpdateFruitEvent(Guid FruitId, string Color) : Event<Fruit>(FruitId)
+public record UpdateFruitEvent(Guid FruitId, string Name, string Color) : Event<Fruit>(FruitId)
 {
     public override Fruit? Apply(Fruit? existing)
     {
-        return existing is null ? null : existing with { Color = Color };
+        return existing is null ? null : existing with { Name = Name, Color = Color };
     }
 }
 

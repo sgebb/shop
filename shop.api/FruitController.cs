@@ -4,12 +4,13 @@ namespace shop.api;
 
 [Route("api/[controller]")]
 [ApiController]
-public class FruitController : ControllerBase
+public class FruitController(IEventStore _eventStore)
+    : ControllerBase
 {
     [HttpGet]
     public IEnumerable<Fruit?> Get()
     {
-        return EventStore.FruitEvents()
+        return _eventStore.Events<Fruit>()
             .GroupBy(f => f.ModelId)
             .Select(g => g.ToModel())
             .Where(f => f is not null);
@@ -18,7 +19,7 @@ public class FruitController : ControllerBase
     [HttpGet("historical")]
     public IEnumerable<IEnumerable<Fruit?>> GetHistoricalAll()
     {
-        return EventStore.FruitEvents()
+        return _eventStore.Events<Fruit>()
             .GroupBy(f => f.ModelId)
             .Select(g => g.ToModelHistorical())
             .Where(f => f is not null);
@@ -27,30 +28,34 @@ public class FruitController : ControllerBase
     [HttpGet("{id}")]
     public Fruit? Get(Guid id)
     {
-        return EventStore.FruitEvents()
-            .Where(f => f.ModelId == id)
+        return _eventStore
+            .Events<Fruit>(id)
             .ToModel();
     }
 
     [HttpGet("{id}/historical")]
     public IEnumerable<Fruit?> GetHistorical(Guid id)
     {
-        return EventStore.FruitEvents().Where(e => e.ModelId == id)
+        return _eventStore
+            .Events<Fruit>(id)
             .ToModelHistorical();
     }
 
     [HttpPost]
-    public void Post([FromBody] Fruit value)
+    public void Post([FromBody] Fruit fruit)
     {
+        _eventStore.AddEvent(new CreateFruitEvent(Guid.NewGuid(), fruit.Name, fruit.Color));
     }
 
-    [HttpPut("{id}")]
-    public void Put(int id, [FromBody] Fruit value)
+    [HttpPatch("{id}")]
+    public void Patch(Guid id, [FromBody] Fruit fruit)
     {
+        _eventStore.AddEvent(new UpdateFruitEvent(id, fruit.Name, fruit.Color));
     }
 
     [HttpDelete("{id}")]
-    public void Delete(int id)
+    public void Delete(Guid id)
     {
+        _eventStore.AddEvent(new DeleteFruitEvent(id));
     }
 }
