@@ -20,9 +20,3 @@ public abstract record Event<T>(Guid ModelId) where T : DomainModel
 
     public abstract T? Apply(T? existing);
 }
-
-public abstract record DomainModel(Guid Id)
-{
-    public DateTimeOffset CreatedAt { get; set; }
-    public DateTimeOffset UpdatedAt { get; set; } 
-}

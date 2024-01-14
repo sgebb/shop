@@ -2,6 +2,15 @@
 
 namespace shop.shared;
 
+public interface IDomainService<T> where T : DomainModel
+{
+    void AddEvent(Event<T> e);
+    IEnumerable<T> Get(DateTimeOffset? at = null);
+    T? Get(Guid id, DateTimeOffset? at = null);
+    IEnumerable<T?> GetHistorical(Guid id);
+    IEnumerable<IEnumerable<T?>> GetHistorical();
+}
+
 public class DomainService<T>(IEventStore<T> _eventStore) : IDomainService<T> where T : DomainModel
 {
     public IEnumerable<T> Get(DateTimeOffset? at = null) => _eventStore

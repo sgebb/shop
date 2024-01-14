@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using shop.shared;
 
-namespace shop.api;
+namespace shop.api.Fruits;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -25,12 +25,12 @@ public class FruitController(IDomainService<Fruit> _fruitService)
         _fruitService.GetHistorical(id);
 
     [HttpPost]
-    public void Post([FromBody] Fruit fruit) => //validate and then
+    public void Post([FromBody] FruitPost fruit) => //validate and then
         _fruitService.AddEvent(new CreateFruitEvent(Guid.NewGuid(), fruit.Name, fruit.Color));
 
     [HttpPatch("{id}")]
-    public void Patch(Guid id, [FromBody] Fruit fruit) => //validate and then
-        _fruitService.AddEvent(new UpdateFruitEvent(id, fruit.Name, fruit.Color));
+    public void Patch(Guid id, [FromBody] FruitPatch fruit) => //validate and then
+        _fruitService.AddEvent(new UpdateFruitEvent(id, fruit.Color));
 
     [HttpDelete("{id}")]
     public void Delete(Guid id) => //validate and then

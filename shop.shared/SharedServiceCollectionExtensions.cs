@@ -22,12 +22,17 @@ public static class SharedServiceCollectionExtensions
 
         var appleId = "Apple".ToGuid();
         fruitEvents.Add(new CreateFruitEvent(appleId, "Apple", "Red"));
-        fruitEvents.Add(new UpdateFruitEvent(appleId, "Apple", "Green"));
+        fruitEvents.Add(new UpdateFruitEvent(appleId, "Green"));
         fruitEvents.Add(new DeleteFruitEvent(appleId));
 
         var bananaId = "Banana".ToGuid();
         fruitEvents.Add(new CreateFruitEvent(bananaId, "Banana", "Yellow"));
-        fruitEvents.Add(new UpdateFruitEvent(bananaId, "Apple", "Orange"));
+        fruitEvents.Add(new UpdateFruitEvent(bananaId, "Orange"));
+
+
+        var kiwiId = "Kiwi".ToGuid();
+        fruitEvents.Add(new CreateFruitEvent(kiwiId, "Kiwi", "Yellow"));
+        fruitEvents.Add(new UpdateFruitEvent(kiwiId, "Orange"));
 
         return fruitEvents;
     }

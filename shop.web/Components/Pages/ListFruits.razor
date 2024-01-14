@@ -7,7 +7,8 @@
 
 <h1>Fruit</h1>
 
-<p>This component demonstrates showing data.</p>
+<p>The fruits we had at @selectedTime</p>
+<InputDate @bind-Value="selectedTime" />
 
 @if (fruits == null)
 {
@@ -18,10 +19,11 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Color</th>
+                <th>Updated at</th>
+                <th>Created at</th>
             </tr>
         </thead>
         <tbody>
@@ -32,7 +34,7 @@ else
                     <td>@fruit.Name</td>
                     <td>@fruit.Color</td>
                     <td>@fruit.UpdatedAt</td>
-                    <td>@fruit.CreatedAt.ToString()</td>
+                    <td>@fruit.CreatedAt</td>
                 </tr>
         }
         </tbody>
@@ -41,9 +43,26 @@ else
 
 @code {
     private IEnumerable<Fruit>? fruits;
+    private DateTime _selectedTime = DateTime.Now;
+    public DateTime selectedTime
+    {
+        get { return _selectedTime;}
+        set
+        {
+            _selectedTime = value;
+            RefreshList();
+        }
+    }
+
+    private void RefreshList()
+    {
+        Console.WriteLine("My debug output.");
+        fruits = FruitService.Get(_selectedTime);
+    }
 
     protected override async Task OnInitializedAsync()
     {
+        Console.WriteLine("My debug output.");
         // Simulate asynchronous loading to demonstrate streaming rendering
         await Task.Delay(500);
 

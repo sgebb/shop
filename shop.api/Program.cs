@@ -1,6 +1,3 @@
-using shop.eventsourcing;
-using shop.shared;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
