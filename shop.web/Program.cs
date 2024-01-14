@@ -3,7 +3,9 @@ using shop.web.Components;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
+builder.Services
+    .AddSharedDependencies()
+    .AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var app = builder.Build();

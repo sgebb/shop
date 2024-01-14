@@ -1,5 +1,5 @@
-using shop.api;
 using shop.eventsourcing;
+using shop.shared;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,7 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
-builder.Services.AddSingleton<IEventStore, InMemoryEventStore>();
+
+builder.Services.AddSharedDependencies();
 
 var app = builder.Build();
 
@@ -16,7 +17,6 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-
 
 app.MapControllers().WithOpenApi();
 

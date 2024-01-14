@@ -1,8 +1,6 @@
 ﻿namespace shop.eventsourcing;
 
-public abstract record DomainEvent(Guid ModelId);
-
-public abstract record Event<T>(Guid ModelId) : DomainEvent(ModelId) where T : DomainModel
+public abstract record Event<T>(Guid ModelId) where T : DomainModel
 { 
     public Guid EventId { get; } = Guid.NewGuid();
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.Now;
@@ -16,7 +14,7 @@ public abstract record Event<T>(Guid ModelId) : DomainEvent(ModelId) where T : D
         }
 
         var createdAt = existing?.CreatedAt ?? AppliesAt;
-        return Apply(existing) with { CreatedAt = createdAt, UpdatedAt = AppliesAt };
+        return Apply(existing)! with { CreatedAt = createdAt, UpdatedAt = AppliesAt };
 
     }
 
