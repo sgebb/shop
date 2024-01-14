@@ -1,4 +1,5 @@
 using shop.api;
+using shop.eventsourcing;
 
 var builder = WebApplication.CreateBuilder(args);
 

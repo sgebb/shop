@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using shop.eventsourcing;
+using shop.shared;
 
 namespace shop.api;
 

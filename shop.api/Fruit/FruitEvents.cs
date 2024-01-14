@@ -1,6 +1,7 @@
-﻿namespace shop.api;
+﻿using shop.eventsourcing;
+using shop.shared;
 
-public record Fruit(Guid Id, string Name, string Color) : DomainModel(Id);
+namespace shop.api;
 
 public record CreateFruitEvent(Guid FruitId, string Name, string Color) : Event<Fruit>(FruitId)
 {

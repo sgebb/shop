@@ -1,4 +1,4 @@
-﻿namespace shop.api;
+﻿namespace shop.eventsourcing;
 
 public abstract record DomainEvent(Guid ModelId);
 

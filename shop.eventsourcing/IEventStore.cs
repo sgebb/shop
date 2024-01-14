@@ -1,4 +1,4 @@
-﻿namespace shop.api;
+﻿namespace shop.eventsourcing;
 
 public interface IEventStore
 {

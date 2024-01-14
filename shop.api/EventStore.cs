@@ -1,4 +1,6 @@
-﻿namespace shop.api;
+﻿using shop.eventsourcing;
+
+namespace shop.api;
 
 public class InMemoryEventStore : IEventStore
 {

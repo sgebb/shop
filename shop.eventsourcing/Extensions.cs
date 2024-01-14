@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace shop.api;
+namespace shop.eventsourcing;
 
 public static class Extensions
 {
