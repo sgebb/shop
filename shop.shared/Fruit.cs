@@ -4,7 +4,7 @@ namespace shop.shared;
 
 public record Fruit(Guid Id, string Name, string Color) : DomainModel(Id);
 
-public record CreateFruitEvent(Guid FruitId, string Name, string Color) : Event<Fruit>(FruitId)
+public record CreateFruitEvent(Guid FruitId, string Name, string Color, DateTimeOffset AppliesAt) : Event<Fruit>(FruitId, AppliesAt)
 {
     public override Fruit? Apply(Fruit? existing)
     {
@@ -12,7 +12,7 @@ public record CreateFruitEvent(Guid FruitId, string Name, string Color) : Event<
     }
 }
 
-public record UpdateFruitEvent(Guid FruitId, string? Color) : Event<Fruit>(FruitId)
+public record UpdateFruitEvent(Guid FruitId, string? Color, DateTimeOffset AppliesAt) : Event<Fruit>(FruitId, AppliesAt)
 {
     public override Fruit? Apply(Fruit? existing)
     {
@@ -23,7 +23,7 @@ public record UpdateFruitEvent(Guid FruitId, string? Color) : Event<Fruit>(Fruit
     }
 }
 
-public record DeleteFruitEvent(Guid FruitId) : Event<Fruit>(FruitId)
+public record DeleteFruitEvent(Guid FruitId, DateTimeOffset AppliesAt) : Event<Fruit>(FruitId, AppliesAt)
 {
     public override Fruit? Apply(Fruit? existing)
     {

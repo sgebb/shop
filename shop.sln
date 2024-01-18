@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shop.api", "shop.api\shop.a
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shop.shared", "shop.shared\shop.shared.csproj", "{C9FD1B4D-F10B-403F-A411-142A2287A0D7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shop.web", "shop.web\shop.web.csproj", "{D435551E-5BA5-44E3-A213-93F183A4F159}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shop.eventsourcing", "shop.eventsourcing\shop.eventsourcing.csproj", "{F4138F83-D0F3-4291-B44D-A139240A87A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "shop.eventsourcing", "shop.eventsourcing\shop.eventsourcing.csproj", "{F4138F83-D0F3-4291-B44D-A139240A87A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "shop.web", "shop.web\shop.web.csproj", "{954421F7-152D-4C7B-B5FD-1DA5537ABAB2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +33,10 @@ Global
 		{F4138F83-D0F3-4291-B44D-A139240A87A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4138F83-D0F3-4291-B44D-A139240A87A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4138F83-D0F3-4291-B44D-A139240A87A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{954421F7-152D-4C7B-B5FD-1DA5537ABAB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{954421F7-152D-4C7B-B5FD-1DA5537ABAB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{954421F7-152D-4C7B-B5FD-1DA5537ABAB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{954421F7-152D-4C7B-B5FD-1DA5537ABAB2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

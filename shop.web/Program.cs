@@ -1,12 +1,14 @@
 using shop.web.Components;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services
-    .AddSharedDependencies()
-    .AddRazorComponents()
+builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddMudServices();
+builder.Services.AddSharedDependencies();
 
 var app = builder.Build();
 

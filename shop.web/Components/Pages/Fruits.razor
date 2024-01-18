@@ -1,0 +1,64 @@
+﻿@page "/fruits"
+@rendermode InteractiveServer
+@using shop.shared
+@attribute [StreamRendering]
+@inject IDomainService<Fruit> FruitService
+
+<MyMudProviders />
+
+<PageTitle>Fruits</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Fruits</MudText>
+<MudDatePicker Label="Basic example" DateChanged="OnDateChange" />
+
+@if (fruits == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudTable Items="fruits" Hover="true" SortLabel="Sort By" Elevation="0">
+        <HeaderContent>
+            <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Fruit, object>(x=>x.Id)">Date</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.Name)">Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.Color)">Color</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.CreatedAt)">Created</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.UpdatedAt)">Updated</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+            <MudTd DataLabel="Color">@context.Color</MudTd>
+            <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
+            <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[]{50, 100}" />
+        </PagerContent>
+    </MudTable>
+}
+
+
+@code {
+    private IEnumerable<Fruit>? fruits;
+    public DateTime? selectedTime = DateTime.Now;
+
+    private void RefreshList()
+    {
+    }
+
+    void OnDateChange(DateTime? newDate)
+    {
+        selectedTime = newDate;
+        fruits = FruitService.Get(selectedTime);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulate asynchronous loading to demonstrate streaming rendering
+        await Task.Delay(500);
+
+        fruits = FruitService.Get(selectedTime);
+    }
+
+}
