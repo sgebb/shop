@@ -9,18 +9,18 @@ public static class SharedServiceCollectionExtensions
 
     public static IServiceCollection AddSharedDependencies(this IServiceCollection services)
     {
-        var inMemoryFruitEventStore = new InMemoryEventStore<Fruit>(FruitEvents());
+        var inMemoryFruitEventStore = new InMemoryEventStore(FruitEvents());
 
         services
-            .AddSingleton<IEventStore<Fruit>>(inMemoryFruitEventStore)
+            .AddSingleton<IEventStore>(inMemoryFruitEventStore)
             .AddTransient<IDomainService<Fruit>, DomainService<Fruit>>();
 
         return services;
     }
 
-    private static List<Event<Fruit>> FruitEvents()
+    private static List<DomainEvent> FruitEvents()
     {
-        List<Event<Fruit>> fruitEvents = [];
+        List<DomainEvent> fruitEvents = [];
 
         var appleId = "Apple".ToGuid();
         fruitEvents.Add(new CreateFruitEvent(appleId, "Apple", "Red", EventDate()));

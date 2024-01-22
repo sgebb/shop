@@ -11,23 +11,24 @@ public interface IDomainService<T> where T : DomainModel
     IEnumerable<IEnumerable<T?>> GetHistorical();
 }
 
-public class DomainService<T>(IEventStore<T> _eventStore) : IDomainService<T> where T : DomainModel
+public class DomainService<T>(IEventStore _eventStore) : IDomainService<T> where T : DomainModel
 {
     public IEnumerable<T> Get(DateTimeOffset? at = null) => _eventStore
-        .Events()
+        .Events<T>()
         .GroupBy(f => f.ModelId)
         .Select(g => g.ToModel(at)!)
         .Where(f => f is not null);
 
     public T? Get(Guid id, DateTimeOffset? at = null) => _eventStore
-        .Events(id)
+        .EventsFor<T>(id)
         .ToModel(at);
 
     public IEnumerable<T?> GetHistorical(Guid id) => _eventStore
-        .Events(id)
+        .EventsFor<T>(id)
         .ToModelHistorical();
 
-    public IEnumerable<IEnumerable<T?>> GetHistorical() => _eventStore.Events()
+    public IEnumerable<IEnumerable<T?>> GetHistorical() => _eventStore
+        .Events<T>()
         .GroupBy(f => f.ModelId)
         .Select(g => g.ToModelHistorical())
         .Where(f => f is not null);
