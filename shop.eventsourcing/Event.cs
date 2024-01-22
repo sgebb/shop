@@ -1,5 +1,4 @@
 ﻿namespace shop.eventsourcing;
-
 public abstract record DomainEvent(Guid EventId, Guid ModelId, DateTimeOffset AppliesAt, DateTimeOffset CreatedAt);
 
 public abstract record Event<T>(Guid ModelId, DateTimeOffset AppliesAt)

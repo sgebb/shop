@@ -1,4 +1,6 @@
-﻿using shop.eventsourcing;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using shop.eventsourcing;
 using shop.shared;
 
 namespace Microsoft.Extensions.DependencyInjection;
@@ -7,12 +9,19 @@ public static class SharedServiceCollectionExtensions
 {
     private static DateTimeOffset currentDateTimeOffset = DateTimeOffset.Now.AddDays(-10);
 
-    public static IServiceCollection AddSharedDependencies(this IServiceCollection services)
+    public static IServiceCollection AddSharedDependencies(this IServiceCollection services, IConfiguration configuration)
     {
-        var inMemoryFruitEventStore = new InMemoryEventStore(FruitEvents());
+        var connectionString = configuration.GetConnectionString("ShopDb");
+        services.AddDbContext<ShopDbContext>(opt =>
+        {
+            opt.UseSqlServer(connectionString, ctxOptions =>
+            {
+                ctxOptions.MigrationsAssembly("shop.api");
+            });
+        });
 
         services
-            .AddSingleton<IEventStore>(inMemoryFruitEventStore)
+            .AddTransient<IEventStore, LocalDbEventStore>()
             .AddTransient<IDomainService<Fruit>, DomainService<Fruit>>();
 
         return services;
