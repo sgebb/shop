@@ -1,7 +1,6 @@
 ﻿using shop.eventsourcing;
 
 namespace shop.shared;
-
 public record Fruit(Guid Id, string Name, string Color) : DomainModel(Id);
 
 public record CreateFruitEvent(Guid FruitId, string Name, string Color, DateTimeOffset AppliesAt) : Event<Fruit>(FruitId, AppliesAt)

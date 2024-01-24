@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using shop.eventsourcing;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Intrinsics.Arm;
 using System.Text.Json;
 
 namespace shop.shared;
