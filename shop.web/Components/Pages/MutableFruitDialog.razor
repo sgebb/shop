@@ -1,0 +1,45 @@
+<MudDialog>
+    <TitleContent>New Fruit</TitleContent>
+    <DialogContent>
+        <MudTextField Label="Name" @bind-Value="FruitName" Required="true" />
+        <MudTextField Label="Color" @bind-Value="FruitColor" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    private string FruitName { get; set; }
+    private string FruitColor { get; set; }
+    [Parameter] public Action<eventsourcing.Event<shared.Fruit>> OnOkEvent { get; set; }
+    [Parameter] public shared.Fruit? ExistingFruit { get; set; }
+
+    void Submit()
+    {
+        // Validate the input if needed
+        if (string.IsNullOrWhiteSpace(FruitName))
+        {
+            // You can show an error message or prevent submission
+            return;
+        }
+
+        // Trigger the AddEvent with a NewFruitEvent
+        var newFruitEvent = new shared.CreateFruitEvent(ExistingFruit?.Id ?? Guid.NewGuid(), FruitName, FruitColor,
+        DateTimeOffset.Now);
+
+        // Invoke the callback with the created NewFruitEvent
+        OnOkEvent?.Invoke(newFruitEvent);
+
+        // Close the dialog
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+}

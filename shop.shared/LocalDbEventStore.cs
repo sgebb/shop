@@ -12,7 +12,12 @@ public class LocalDbEventStore : IEventStore
     public LocalDbEventStore(ShopDbContext shopDb)
     {
         _shopDb = shopDb;
-        _shopDb.Database.Migrate();
+
+        var assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
+        if (assemblyName != "shop.web")
+        {
+            _shopDb.Database.Migrate();
+        }
     }
 
     public void AddEvent<T>(Event<T> e) where T : DomainModel

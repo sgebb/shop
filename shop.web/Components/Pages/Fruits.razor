@@ -3,13 +3,18 @@
 @using shop.shared
 @attribute [StreamRendering]
 @inject IDomainService<Fruit> FruitService
+@inject IDialogService DialogService
 
 <MyMudProviders />
 
 <PageTitle>Fruits</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Fruits</MudText>
-<MudDatePicker Label="Basic example" DateChanged="OnDateChange" />
+<MudDatePicker Label="Fruits at date:" DateChanged="OnDateChange" />
+
+<MudButton @onclick="(() => OpenModifyOrCreateFruit(null))" Variant="Variant.Filled" Color="Color.Primary">
+    New Fruit
+</MudButton>
 
 @if (fruits == null)
 {
@@ -19,11 +24,22 @@ else
 {
     <MudTable Items="fruits" Hover="true" SortLabel="Sort By" Elevation="0">
         <HeaderContent>
-            <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Fruit, object>(x=>x.Id)">Date</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.Name)">Name</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.Color)">Color</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.CreatedAt)">Created</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.UpdatedAt)">Updated</MudTableSortLabel></MudTh>
+            <MudTh>
+                <MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<Fruit, object>(x=>x.Id)">Date
+                </MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.Name)">Name</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.Color)">Color</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.CreatedAt)">Created</MudTableSortLabel>
+            </MudTh>
+            <MudTh>
+                <MudTableSortLabel SortBy="new Func<Fruit, object>(x=>x.UpdatedAt)">Updated</MudTableSortLabel>
+            </MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
@@ -31,6 +47,10 @@ else
             <MudTd DataLabel="Color">@context.Color</MudTd>
             <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
             <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
+            @* <MudButton @onclick="(() => OpenModifyOrCreateFruit(context))" Variant="Variant.Filled"
+        Color="Color.Primary">
+        New Fruit
+        </MudButton> *@
         </RowTemplate>
         <PagerContent>
             <MudTablePager PageSizeOptions="new int[]{50, 100}" />
@@ -38,27 +58,39 @@ else
     </MudTable>
 }
 
-
 @code {
     private IEnumerable<Fruit>? fruits;
     public DateTime? selectedTime = DateTime.Now;
+    // Open the dialog for adding a new fruit
+    private void OpenModifyOrCreateFruit(Fruit? existing = null)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("ExistingFruit", existing);
+        parameters.Add("OnOkEvent", (Action<eventsourcing.Event<Fruit>>)(e => AddEvent(e)));
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<MutableFruitDialog>(existing is null ? "New Fruit" : "Update Fruit", parameters, options);
+    }
+
+    private void AddEvent(eventsourcing.Event<Fruit> newFruitEvent)
+    {
+        FruitService.AddEvent(newFruitEvent);
+    }
 
     private void RefreshList()
     {
+        fruits = FruitService.Get(selectedTime);
     }
 
     void OnDateChange(DateTime? newDate)
     {
         selectedTime = newDate;
-        fruits = FruitService.Get(selectedTime);
+        RefreshList();
     }
 
     protected override async Task OnInitializedAsync()
     {
         // Simulate asynchronous loading to demonstrate streaming rendering
         await Task.Delay(500);
-
-        fruits = FruitService.Get(selectedTime);
+        RefreshList();
     }
-
 }
