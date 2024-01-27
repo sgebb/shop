@@ -29,6 +29,12 @@ else
             <MudTd DataLabel="Color">@context.Color</MudTd>
             <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
             <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
+                <MudButton @onclick="(() => OpenModifyOrCreateFruit(context))" Variant="Variant.Filled" Color="Color.Primary">
+                    Update
+                </MudButton>
+                <MudButton @onclick="(() => DeleteFruit(context))" Variant="Variant.Filled" Color="Color.Error">
+                    Delete
+                </MudButton>
         </RowTemplate>
         <PagerContent>
             <MudTablePager PageSizeOptions="new int[]{50, 100}" />
@@ -38,19 +44,29 @@ else
 @code {
     private IEnumerable<Fruit>? fruits;
     public DateTime? selectedTime = DateTime.Now;
-    // // Open the dialog for adding a new fruit
+
     private void OpenModifyOrCreateFruit(Fruit? existing = null)
     {
         var parameters = new DialogParameters();
-        parameters.Add("ExistingFruit", existing);
+        parameters.Add("FruitName", existing?.Name);
+        parameters.Add("FruitColor", existing?.Color);
+        parameters.Add("ExistingId", existing?.Id);
+
         parameters.Add("OnOkEvent", (Action<eventsourcing.Event<Fruit>>)(e => AddEvent(e)));
         var options = new DialogOptions { CloseOnEscapeKey = true };
         DialogService.Show<MutableFruitDialog>(existing is null ? "New Fruit" : "Update Fruit", parameters, options);
     }
 
+    private void DeleteFruit(Fruit existing)
+    {
+        var e = new DeleteFruitEvent(existing.Id, DateTimeOffset.Now.AddDays(-1));
+        AddEvent(e);
+    }
+
     private void AddEvent(eventsourcing.Event<Fruit> newFruitEvent)
     {
         FruitService.AddEvent(newFruitEvent);
+        RefreshList();
     }
 
     private void RefreshList()

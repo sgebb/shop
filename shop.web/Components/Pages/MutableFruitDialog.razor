@@ -1,3 +1,5 @@
+@using shop.eventsourcing
+@using shop.shared
 <MudDialog>
     <TitleContent>New Fruit</TitleContent>
     <DialogContent>
@@ -15,26 +17,32 @@
 
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
 
-    private string FruitName { get; set; }
-    private string FruitColor { get; set; }
+    [Parameter] public Guid? ExistingId { get; set; }
+    [Parameter] public string? FruitName { get; set; }
+    [Parameter] public string? FruitColor { get; set; }
     [Parameter] public Action<eventsourcing.Event<shared.Fruit>> OnOkEvent { get; set; }
-    [Parameter] public shared.Fruit? ExistingFruit { get; set; }
 
     void Submit()
     {
         // Validate the input if needed
-        if (string.IsNullOrWhiteSpace(FruitName))
+        if (string.IsNullOrWhiteSpace(FruitName) || string.IsNullOrWhiteSpace(FruitColor))
         {
             // You can show an error message or prevent submission
             return;
         }
 
-        // Trigger the AddEvent with a NewFruitEvent
-        var newFruitEvent = new shared.CreateFruitEvent(ExistingFruit?.Id ?? Guid.NewGuid(), FruitName, FruitColor,
-        DateTimeOffset.Now);
+        Event<Fruit> e;
+        if (!ExistingId.HasValue)
+        {
+            e = new shared.CreateFruitEvent(Guid.NewGuid(), FruitName, FruitColor, DateTimeOffset.Now.AddDays(-1));   
+        }
+        else
+        {
+            e = new shared.UpdateFruitEvent(ExistingId.Value, FruitColor, DateTimeOffset.Now.AddDays(-1));
+        }
 
         // Invoke the callback with the created NewFruitEvent
-        OnOkEvent?.Invoke(newFruitEvent);
+        OnOkEvent?.Invoke(e);
 
         // Close the dialog
         MudDialog.Close(DialogResult.Ok(true));
