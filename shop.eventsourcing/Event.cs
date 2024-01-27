@@ -15,7 +15,6 @@ public abstract record Event<T>(Guid ModelId, DateTimeOffset AppliesAt)
 
         var createdAt = existing?.CreatedAt ?? AppliesAt;
         return Apply(existing)! with { CreatedAt = createdAt, UpdatedAt = AppliesAt };
-
     }
 
     public abstract T? Apply(T? existing);
