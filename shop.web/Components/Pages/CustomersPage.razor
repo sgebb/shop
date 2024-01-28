@@ -1,0 +1,80 @@
+﻿@page "/customers"
+@rendermode InteractiveServer
+@using shop.shared
+@attribute [StreamRendering]
+@inject IDomainService<Customer> CustomerService
+@inject IDialogService DialogService
+
+<MyMudProviders />
+
+<PageTitle>Customers</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Customers</MudText>
+<MudDatePicker Label="Customers at date:" DateChanged="OnDateChange" />
+
+<MudButton @onclick="(() => OpenModifyOrCreateCustomer(null))" Variant="Variant.Filled" Color="Color.Primary">
+    New Customer
+</MudButton>
+
+@if (Customers == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudTable Items="Customers" Hover="true" SortLabel="Sort By" Elevation="0">
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+            <MudTd DataLabel="Address">@context.Address</MudTd>
+            <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
+            <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
+                <MudButton @onclick="(() => OpenModifyOrCreateCustomer(context))" Variant="Variant.Filled" Color="Color.Primary">
+                    Update
+                </MudButton>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[]{50, 100}" />
+        </PagerContent>
+    </MudTable>
+}
+@code {
+    private IEnumerable<Customer>? Customers;
+    public DateTime? selectedTime = DateTime.Now;
+
+    private void OpenModifyOrCreateCustomer(Customer? existing = null)
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("CustomerName", existing?.Name);
+        parameters.Add("CustomerAddress", existing?.Address);
+        parameters.Add("ExistingId", existing?.Id);
+
+        parameters.Add("OnOkEvent", (Action<eventsourcing.Event<Customer>>)(e => AddEvent(e)));
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<MutableCustomerDialog>(existing is null ? "New Customer" : "Update Customer", parameters, options);
+    }
+
+    private void AddEvent(eventsourcing.Event<Customer> newCustomerEvent)
+    {
+        CustomerService.AddEvent(newCustomerEvent);
+        RefreshList();
+    }
+
+    private void RefreshList()
+    {
+        Customers = CustomerService.Get(selectedTime);
+    }
+
+    void OnDateChange(DateTime? newDate)
+    {
+        selectedTime = newDate;
+        RefreshList();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Simulate asynchronous loading to demonstrate streaming rendering
+        await Task.Delay(500);
+        RefreshList();
+    }
+}

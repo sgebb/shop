@@ -1,0 +1,53 @@
+@using shop.eventsourcing
+@using shop.shared
+<MudDialog>
+    <TitleContent>New Customer</TitleContent>
+    <DialogContent>
+        <MudTextField Label="Name" @bind-Value="CustomerName" Required="true" />
+        <MudTextField Label="Address" @bind-Value="CustomerAddress" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public Guid? ExistingId { get; set; }
+    [Parameter] public string? CustomerName { get; set; }
+    [Parameter] public string? CustomerAddress { get; set; }
+    [Parameter] public Action<eventsourcing.Event<shared.Customer>> OnOkEvent { get; set; }
+
+    void Submit()
+    {
+        // Validate the input if needed
+        if (string.IsNullOrWhiteSpace(CustomerName) || string.IsNullOrWhiteSpace(CustomerAddress))
+        {
+            // You can show an error message or prevent submission
+            return;
+        }
+
+        Event<Customer> e;
+        if (!ExistingId.HasValue)
+        {
+            e = new shared.NewCustomerEvent(Guid.NewGuid(), CustomerName, CustomerAddress, DateTimeOffset.Now.AddDays(-1));   
+        }
+        else
+        {
+            e = new shared.UpdateCustomerAddressEvent(ExistingId.Value, CustomerAddress, DateTimeOffset.Now.AddDays(-1));
+        }
+
+        // Invoke the callback with the created NewCustomerEvent
+        OnOkEvent?.Invoke(e);
+
+        // Close the dialog
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+}
