@@ -4,6 +4,10 @@
 opprette, endre og slette domeneobjekter - alt lagres som events
 kan hente historiske tilstander
 bonus? - ting som interagerer. hvor mange av hver frukt har man på hvert tidspunkt.
+hva med hvilken farge hadde frukten når man kjøpte den?
+vanskelig - ønsker å lagre referansen til frukten og tidspunktet, ikke info om frukten.
+men man har nok til å hente det ut i kontrolleren. dette eksempelet eksponrer bare domeneobjektene direkte,
+	det er ikke så realistisk. Må forvente å modde litt for å finne ut sånne ting
 
 
 2 - 

@@ -11,7 +11,7 @@ public static class Extensions
     {
         T? current = null;
 
-        foreach(var e in events)
+        foreach (var e in events)
         {
             if (e.AppliesAt > at)
             {
