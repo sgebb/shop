@@ -1,7 +1,7 @@
 ﻿using shop.eventsourcing;
 
 namespace shop.shared;
-public record Customer(Guid Id, string Name, string Address, Dictionary<Guid, int> FruitHoldings) : DomainModel(Id);
+public record Customer(Guid Id, string Name, string Address, int Holdings) : DomainModel(Id);
 
 public record NewCustomerEvent(Guid CustomerId, string Name, string Address, DateTimeOffset AppliesAt) : EventBase, IEvent<Customer>
 {
@@ -9,7 +9,7 @@ public record NewCustomerEvent(Guid CustomerId, string Name, string Address, Dat
     public DateTimeOffset AppliesAt { get; set; } = AppliesAt;
     public  Customer? Apply(Customer? existing)
     {
-        return new Customer(CustomerId, Name, Address, []);
+        return new Customer(CustomerId, Name, Address, 0);
     }
 }
 

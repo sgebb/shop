@@ -28,7 +28,8 @@ else
             <MudTd DataLabel="Name">@context.Name</MudTd>
             <MudTd DataLabel="Color">@context.Color</MudTd>
             <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
-            <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
+                <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
+                <MudTd DataLabel="Holdings">@context.Holdings</MudTd>
                 <MudButton @onclick="(() => OpenModifyOrCreateFruit(context))" Variant="Variant.Filled" Color="Color.Primary">
                     Update
                 </MudButton>

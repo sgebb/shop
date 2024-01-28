@@ -76,15 +76,9 @@ public record SellFruitEvent(Guid FruitId, Guid CustomerId, int Amount, DateTime
             return null;
         }
 
-        if(existing.FruitHoldings.TryGetValue(FruitId, out var _))
-        {
-            existing.FruitHoldings[FruitId] += Amount;
-        }
-        else
-        {
-            existing.FruitHoldings.Add(FruitId, Amount);
-        }
-
-        return existing;
+        return existing with 
+        { 
+            Holdings = existing.Holdings + Amount
+        };
     }
 }

@@ -16,22 +16,23 @@
     New Customer
 </MudButton>
 
-@if (Customers == null)
+@if (customers == null)
 {
     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 else
 {
-    <MudTable Items="Customers" Hover="true" SortLabel="Sort By" Elevation="0">
+    <MudTable Items="customers" Hover="true" SortLabel="Sort By" Elevation="0">
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
             <MudTd DataLabel="Name">@context.Name</MudTd>
             <MudTd DataLabel="Address">@context.Address</MudTd>
             <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
             <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
-                <MudButton @onclick="(() => OpenModifyOrCreateCustomer(context))" Variant="Variant.Filled" Color="Color.Primary">
-                    Update
-                </MudButton>
+            <MudTd DataLabel="Holdings">@context.Holdings</MudTd>
+            <MudButton @onclick="(() => OpenModifyOrCreateCustomer(context))" Variant="Variant.Filled" Color="Color.Primary">
+                Update
+            </MudButton>
         </RowTemplate>
         <PagerContent>
             <MudTablePager PageSizeOptions="new int[]{50, 100}" />
@@ -39,7 +40,7 @@ else
     </MudTable>
 }
 @code {
-    private IEnumerable<Customer>? Customers;
+    private IEnumerable<Customer>? customers;
     public DateTime? selectedTime = DateTime.Now;
 
     private void OpenModifyOrCreateCustomer(Customer? existing = null)
@@ -62,7 +63,7 @@ else
 
     private void RefreshList()
     {
-        Customers = CustomerService.Get(selectedTime);
+        customers = CustomerService.Get(selectedTime);
     }
 
     void OnDateChange(DateTime? newDate)
