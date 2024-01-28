@@ -52,7 +52,7 @@ else
         parameters.Add("FruitColor", existing?.Color);
         parameters.Add("ExistingId", existing?.Id);
 
-        parameters.Add("OnOkEvent", (Action<eventsourcing.Event<Fruit>>)(e => AddEvent(e)));
+        parameters.Add("OnOkEvent", (Action<eventsourcing.IEvent<Fruit>>)(e => AddEvent(e)));
         var options = new DialogOptions { CloseOnEscapeKey = true };
         DialogService.Show<MutableFruitDialog>(existing is null ? "New Fruit" : "Update Fruit", parameters, options);
     }
@@ -63,7 +63,7 @@ else
         AddEvent(e);
     }
 
-    private void AddEvent(eventsourcing.Event<Fruit> newFruitEvent)
+    private void AddEvent(eventsourcing.IEvent<Fruit> newFruitEvent)
     {
         FruitService.AddEvent(newFruitEvent);
         RefreshList();

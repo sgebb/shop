@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using shop.eventsourcing;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection;
 using System.Text.Json;
 
 namespace shop.shared;
@@ -13,59 +14,84 @@ public class LocalDbEventStore : IEventStore
     {
         _shopDb = shopDb;
 
-        var assemblyName = System.Reflection.Assembly.GetEntryAssembly().GetName().Name;
+        var assemblyName = Assembly.GetEntryAssembly()!.GetName().Name;
         if (assemblyName != "shop.web")
         {
             _shopDb.Database.Migrate();
         }
     }
 
-    public void AddEvent<T>(Event<T> e) where T : DomainModel
+    private static T Deserialize<T>(IEventEntity e) where T : class
     {
-        var entity = new EventEntity(e.ModelId, e.AppliesAt, e.CreatedAt, typeof(T).FullName!, e.GetType().FullName!, JsonSerializer.Serialize(e, e.GetType()));
+        Type t = Type.GetType(e.EventType)!;
+        return (JsonSerializer.Deserialize(e.Content, t) as T)!;
+    }
+
+    IEnumerable<IEvent<T>> IEventStore.Events<T>()
+    {
+        return _shopDb.IEvents
+            .Where(e => e.DomainModelType.Contains(typeof(T).FullName!))
+            .AsEnumerable()
+            .Select(Deserialize<IEvent<T>>);
+    }
+
+    IEnumerable<IEvent<T>> IEventStore.EventsFor<T>(Guid modelId)
+    {
+        return _shopDb.IEvents
+            .Where(e => e.DomainModelType.Contains(typeof(T).FullName!))
+            .Where(e => e.ModelId.Contains(modelId))
+            .AsEnumerable()
+            .Select(Deserialize<IEvent<T>>);
+    }
+
+    public void AddEvent<T>(IEvent<T> e) where T : DomainModel
+    {
+        Type eventType = e.GetType();
+
+        List<Guid> modelIds = [];
+        List<string> domainModelTypes = [];
+
+        foreach (Type interfaceType in eventType.GetInterfaces())
+        {
+            if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IEvent<>))
+            {
+                Type modelType = interfaceType.GetGenericArguments()[0];
+                domainModelTypes.Add(modelType.FullName!);
+                PropertyInfo modelIdProperty = interfaceType.GetProperty("ModelId")!;
+                if (modelIdProperty != null)
+                {
+                    Guid modelId = (Guid)modelIdProperty.GetValue(e)!;
+                    modelIds.Add(modelId);
+                }
+            }
+        }
+
+        var entity = new IEventEntity(
+            modelIds,
+            e.AppliesAt, 
+            e.CreatedAt, 
+            domainModelTypes, 
+            eventType.FullName!,
+            JsonSerializer.Serialize(e, eventType));
         _shopDb.Add(entity);
         _shopDb.SaveChanges();
-    }
-
-    public IEnumerable<DomainEvent> AllEvents()
-    {
-        return _shopDb.Events
-            .AsEnumerable()
-            .Select(e => Deserialize<DomainEvent>(e));
-    }
-
-    private static T Deserialize<T>(EventEntity e) where T : class
-    {
-        Type t = Type.GetType(e.EventType);
-        return JsonSerializer.Deserialize(e.Content, t) as T;
-    }
-
-    public IEnumerable<Event<T>> Events<T>() where T : DomainModel
-    {
-        return _shopDb.Events
-            .Where(e => e.DomainModelType == typeof(T).FullName)
-            .AsEnumerable()
-            .Select(Deserialize<Event<T>>);
-    }
-
-    public IEnumerable<Event<T>> EventsFor<T>(Guid modelId) where T : DomainModel
-    {
-        return _shopDb.Events
-            .Where(e => e.DomainModelType == typeof(T).FullName)
-            .Where(e => e.ModelId == modelId)
-            .AsEnumerable()
-            .Select(Deserialize<Event<T>>);
     }
 }
 
 public class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbContext(options)
 {
-    public DbSet<EventEntity> Events { get; set; }
+    public DbSet<IEventEntity> IEvents { get; set; }
 
 }
 
-public record EventEntity(Guid ModelId, DateTimeOffset AppliesAt, DateTimeOffset CreatedAt, string DomainModelType, string EventType, string Content)
+public record IEventEntity(
+    List<Guid> ModelId,
+    DateTimeOffset AppliesAt,
+    DateTimeOffset CreatedAt, 
+    List<string> DomainModelType,
+    string EventType, 
+    string Content)
 {
     [Key]
     public Guid EventId { get; set; }
-};
+}

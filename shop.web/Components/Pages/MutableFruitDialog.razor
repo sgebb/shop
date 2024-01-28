@@ -20,7 +20,7 @@
     [Parameter] public Guid? ExistingId { get; set; }
     [Parameter] public string? FruitName { get; set; }
     [Parameter] public string? FruitColor { get; set; }
-    [Parameter] public Action<eventsourcing.Event<shared.Fruit>> OnOkEvent { get; set; }
+    [Parameter] public Action<eventsourcing.IEvent<shared.Fruit>> OnOkEvent { get; set; }
 
     void Submit()
     {
@@ -31,7 +31,7 @@
             return;
         }
 
-        Event<Fruit> e;
+        IEvent<Fruit> e;
         if (!ExistingId.HasValue)
         {
             e = new shared.CreateFruitEvent(Guid.NewGuid(), FruitName, FruitColor, DateTimeOffset.Now.AddDays(-1));   

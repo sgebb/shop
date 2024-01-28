@@ -4,10 +4,10 @@ namespace shop.eventsourcing;
 
 public static class Extensions
 {
-    public static T? ToModel<T>(this IEnumerable<Event<T>> events, DateTimeOffset? at = null) where T : DomainModel =>
+    public static T? ToModel<T>(this IEnumerable<IEvent<T>> events, DateTimeOffset? at = null) where T : DomainModel =>
         events.ToModelHistorical(at).LastOrDefault();
 
-    public static IEnumerable<T?> ToModelHistorical<T>(this IEnumerable<Event<T>> events, DateTimeOffset? at = null) where T : DomainModel
+    public static IEnumerable<T?> ToModelHistorical<T>(this IEnumerable<IEvent<T>> events, DateTimeOffset? at = null) where T : DomainModel
     {
         T? current = null;
 

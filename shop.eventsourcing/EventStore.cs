@@ -2,8 +2,7 @@
 
 public interface IEventStore
 {
-    IEnumerable<DomainEvent> AllEvents();
-    IEnumerable<Event<T>> Events<T>() where T : DomainModel;
-    IEnumerable<Event<T>> EventsFor<T>(Guid modelId) where T : DomainModel;
-    void AddEvent<T>(Event<T> e) where T : DomainModel;
+    IEnumerable<IEvent<T>> Events<T>() where T : DomainModel;
+    IEnumerable<IEvent<T>> EventsFor<T>(Guid modelId) where T : DomainModel;
+    void AddEvent<T>(IEvent<T> e) where T : DomainModel;
 }

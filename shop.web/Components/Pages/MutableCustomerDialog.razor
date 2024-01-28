@@ -20,7 +20,7 @@
     [Parameter] public Guid? ExistingId { get; set; }
     [Parameter] public string? CustomerName { get; set; }
     [Parameter] public string? CustomerAddress { get; set; }
-    [Parameter] public Action<eventsourcing.Event<shared.Customer>> OnOkEvent { get; set; }
+    [Parameter] public Action<eventsourcing.IEvent<shared.Customer>> OnOkEvent { get; set; }
 
     void Submit()
     {
@@ -31,7 +31,7 @@
             return;
         }
 
-        Event<Customer> e;
+        IEvent<Customer> e;
         if (!ExistingId.HasValue)
         {
             e = new shared.NewCustomerEvent(Guid.NewGuid(), CustomerName, CustomerAddress, DateTimeOffset.Now.AddDays(-1));   

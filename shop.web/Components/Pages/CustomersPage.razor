@@ -49,12 +49,12 @@ else
         parameters.Add("CustomerAddress", existing?.Address);
         parameters.Add("ExistingId", existing?.Id);
 
-        parameters.Add("OnOkEvent", (Action<eventsourcing.Event<Customer>>)(e => AddEvent(e)));
+        parameters.Add("OnOkEvent", (Action<eventsourcing.IEvent<Customer>>)(e => AddEvent(e)));
         var options = new DialogOptions { CloseOnEscapeKey = true };
         DialogService.Show<MutableCustomerDialog>(existing is null ? "New Customer" : "Update Customer", parameters, options);
     }
 
-    private void AddEvent(eventsourcing.Event<Customer> newCustomerEvent)
+    private void AddEvent(eventsourcing.IEvent<Customer> newCustomerEvent)
     {
         CustomerService.AddEvent(newCustomerEvent);
         RefreshList();
