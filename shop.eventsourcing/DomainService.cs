@@ -4,7 +4,6 @@ namespace shop.shared;
 
 public interface IDomainService<T> where T : DomainModel
 {
-    void AddEvent(IEvent<T> e);
     IEnumerable<T> Get(DateTimeOffset? at = null);
     T? Get(Guid id, DateTimeOffset? at = null);
     IEnumerable<T> GetHistorical(Guid id);
@@ -31,7 +30,4 @@ public class DomainService<T>(IEventStore _eventStore) : IDomainService<T> where
         .Events<T>()
         .GroupBy(f => f.ModelId)
         .Select(g => g.ToModelHistorical());
-
-    public void AddEvent(IEvent<T> e) => _eventStore
-        .AddEvent(e);
 }

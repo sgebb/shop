@@ -20,7 +20,8 @@ public static class SharedServiceCollectionExtensions
 
         services
             .AddTransient<IEventStore, LocalDbEventStore>()
-            .AddSingleton<IEventBus, InMemoryEventBus>();
+            .AddSingleton<IEventBus, InMemoryEventBus>()
+            .AddHostedService<EventInserter>();
 
         services.RegisterDomainDependencies();
 
@@ -50,8 +51,8 @@ public static class SharedServiceCollectionExtensions
         return services
             .AddTransient<IDomainService<T>, DomainService<T>>()
             .AddTransient<IQueryService<T>, QueryService<T>>()
-            .AddTransient<ICacheRefresher<T>, CacheRefresher<T>>()
-            .AddHostedService<CacheRefresher<T>>();
+            .AddTransient<IReadModelRefresher<T>, ReadModelRefresher<T>>()
+            .AddHostedService<ReadModelRefresher<T>>();
     }
 
 }

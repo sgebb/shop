@@ -5,15 +5,15 @@ using shop.eventsourcing;
 using System.Text.Json;
 
 namespace shop.shared;
-public interface ICacheRefresher<T> where T : DomainModel
+public interface IReadModelRefresher<T> where T : DomainModel
 {
     Task RefreshCache(CancellationToken stoppingToken);
 }
 
-public class CacheRefresher<T>(
+public class ReadModelRefresher<T>(
     IEventBus _bus,
     IServiceScopeFactory _scopeFactory)
-    : BackgroundService, ICacheRefresher<T> where T : DomainModel
+    : BackgroundService, IReadModelRefresher<T> where T : DomainModel
 {
     public async Task RefreshCache(CancellationToken stoppingToken)
     {
@@ -27,7 +27,7 @@ public class CacheRefresher<T>(
             .ExecuteDeleteAsync(cancellationToken: stoppingToken);
 
         await _shopDbContext.ReadModels.AddRangeAsync(
-            historical.SelectMany(l => 
+            historical.SelectMany(l =>
             l.Select(m =>
                 new ReadModel(m.UpdatedAt, typeof(T).FullName!, m.Id, JsonSerializer.Serialize(m)))),
             stoppingToken);
@@ -37,14 +37,14 @@ public class CacheRefresher<T>(
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var events = _bus.Subscribe<T>();
+        var events = _bus.Subscribe<RefreshEvent>();
         await foreach (var e in events)
         {
+            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+
             using var scope = _scopeFactory.CreateScope();
             var _shopDbContext = scope.ServiceProvider.GetRequiredService<ShopDbContext>();
             var _domainService = scope.ServiceProvider.GetRequiredService<IDomainService<T>>();
-
-            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
 
             foreach (var id in e.Ids)
             {
@@ -66,7 +66,7 @@ public class CacheRefresher<T>(
                 }
                 catch (Exception)
                 {
-                    //probably doesn't exist
+                    // combination of T and id doesn't exist, not unexpected
                 }
             }
         }

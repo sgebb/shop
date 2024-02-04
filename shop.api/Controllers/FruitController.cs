@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using shop.eventsourcing;
 using shop.shared;
 
 namespace shop.api.Controllers;
@@ -6,7 +7,7 @@ namespace shop.api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class FruitController(
-    IDomainService<Fruit> _fruitService)
+    IEventBus _eventBus)
     : ControllerBase
 {
     [HttpPost]
@@ -14,21 +15,21 @@ public class FruitController(
     {
         //validate and then
         var guid = Guid.NewGuid();
-        _fruitService.AddEvent(new CreateFruitEvent(guid, fruit.Name, fruit.Color));
+        _eventBus.Publish(new CreateFruitEvent(guid, fruit.Name, fruit.Color));
         return new Fruit(guid, fruit.Name, fruit.Color);
     }
 
     [HttpPatch("{id}")]
     public void Patch(Guid id, [FromBody] FruitPatch fruit) => //validate and then
-        _fruitService.AddEvent(new UpdateFruitEvent(id, fruit.Color));
+        _eventBus.Publish(new UpdateFruitEvent(id, fruit.Color));
 
     [HttpDelete("{id}")]
     public void Delete(Guid id) => //validate and then
-        _fruitService.AddEvent(new DeleteFruitEvent(id));
+        _eventBus.Publish(new DeleteFruitEvent(id));
 
     [HttpPost("{id}/sell")]
     public void Test(Guid id, [FromBody] SellFruitPost sellFruit) => //validate and then
-        _fruitService.AddEvent(new SellFruitEvent(id, sellFruit.CustomerId, sellFruit.Amount));
+        _eventBus.Publish<IEvent<Fruit>>(new SellFruitEvent(id, sellFruit.CustomerId, sellFruit.Amount));
 }
 
 public record FruitPatch(string Color);

@@ -10,7 +10,7 @@ namespace shop.api.Controllers;
 [GenericController]
 public class QueryController<T>(
     IQueryService<T> _queryService,
-    ICacheRefresher<T> _cacheRefresher) 
+    IReadModelRefresher<T> _cacheRefresher) 
     : ControllerBase where T : DomainModel
 {
     [HttpGet]

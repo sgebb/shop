@@ -2,7 +2,7 @@
 @rendermode InteractiveServer
 @using shop.shared
 @attribute [StreamRendering]
-@inject IDomainService<Customer> CustomerService
+@inject IEventBus EventBus
 @inject IDialogService DialogService
 @inject IQueryService<Customer> CustomerQueryService
 
@@ -58,7 +58,7 @@ else
 
     private void AddEvent(eventsourcing.IEvent<Customer> newCustomerEvent)
     {
-        CustomerService.AddEvent(newCustomerEvent);
+        EventBus.Publish(newCustomerEvent);
         RefreshList();
     }
 

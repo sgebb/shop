@@ -2,7 +2,7 @@
 @rendermode InteractiveServer
 @using shop.shared
 @attribute [StreamRendering]
-@inject IDomainService<Fruit> FruitService
+@inject IEventBus EventBus
 @inject IDialogService DialogService
 @inject IQueryService<Fruit> FruitQueryService
 
@@ -67,7 +67,7 @@ else
 
     private void AddEvent(eventsourcing.IEvent<Fruit> newFruitEvent)
     {
-        FruitService.AddEvent(newFruitEvent);
+        EventBus.Publish(newFruitEvent);
         RefreshList();
     }
 

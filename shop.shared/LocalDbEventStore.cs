@@ -8,9 +8,8 @@ namespace shop.shared;
 public class LocalDbEventStore : IEventStore
 {
     private readonly ShopDbContext _shopDb;
-    private readonly IEventBus _eventBus;
 
-    public LocalDbEventStore(ShopDbContext shopDb, IEventBus eventBus)
+    public LocalDbEventStore(ShopDbContext shopDb)
     {
         _shopDb = shopDb;
 
@@ -19,7 +18,6 @@ public class LocalDbEventStore : IEventStore
         {
             _shopDb.Database.Migrate();
         }
-        _eventBus = eventBus;
     }
 
     private static T Deserialize<T>(IEventEntity e) where T : class
@@ -31,6 +29,7 @@ public class LocalDbEventStore : IEventStore
     IEnumerable<IEvent<T>> IEventStore.Events<T>()
     {
         return _shopDb.IEvents
+            .OrderBy(e => e.CreatedAt)
             .Where(e => e.DomainModelType.Contains(typeof(T).FullName!))
             .AsEnumerable()
             .Select(Deserialize<IEvent<T>>);
@@ -39,33 +38,18 @@ public class LocalDbEventStore : IEventStore
     IEnumerable<IEvent<T>> IEventStore.EventsFor<T>(Guid modelId)
     {
         return _shopDb.IEvents
+            .OrderBy(e => e.CreatedAt)
             .Where(e => e.DomainModelType.Contains(typeof(T).FullName!))
             .Where(e => e.ModelId.Contains(modelId))
             .AsEnumerable()
             .Select(Deserialize<IEvent<T>>);
     }
 
-    public void AddEvent<T>(IEvent<T> e) where T : DomainModel
+    public void AddEvent(IEventBase e)
     {
         Type eventType = e.GetType();
 
-        List<Guid> modelIds = [];
-        List<Type> domainModelTypes = [];
-
-        foreach (Type interfaceType in eventType.GetInterfaces())
-        {
-            if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IEvent<>))
-            {
-                Type modelType = interfaceType.GetGenericArguments()[0];
-                domainModelTypes.Add(modelType);
-                PropertyInfo modelIdProperty = interfaceType.GetProperty("ModelId")!;
-                if (modelIdProperty != null)
-                {
-                    Guid modelId = (Guid)modelIdProperty.GetValue(e)!;
-                    modelIds.Add(modelId);
-                }
-            }
-        }
+        var (domainModelTypes, modelIds) = e.GetTypeAndModelData();
 
         var entity = new IEventEntity(
             modelIds, 
@@ -74,7 +58,6 @@ public class LocalDbEventStore : IEventStore
             eventType.FullName!,
             JsonSerializer.Serialize(e, eventType));
         _shopDb.Add(entity);
-        _eventBus.Publish(new RefreshEvent(domainModelTypes, modelIds));
         _shopDb.SaveChanges();
     }
 }
