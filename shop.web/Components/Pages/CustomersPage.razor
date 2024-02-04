@@ -41,7 +41,7 @@ else
 }
 @code {
     private IEnumerable<Customer>? customers;
-    public DateTime? selectedTime = DateTime.Now;
+    public DateTime? selectedTime = DateTime.Now.Date.AddDays(1);
 
     private void OpenModifyOrCreateCustomer(Customer? existing = null)
     {
@@ -68,7 +68,7 @@ else
 
     void OnDateChange(DateTime? newDate)
     {
-        selectedTime = newDate;
+        selectedTime = newDate!.Value.Date.AddDays(1);
         RefreshList();
     }
 

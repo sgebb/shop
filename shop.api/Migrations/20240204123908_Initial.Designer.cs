@@ -12,8 +12,8 @@ using shop.shared;
 namespace shop.api.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    [Migration("20240204122257_initial")]
-    partial class initial
+    [Migration("20240204123908_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,6 +53,31 @@ namespace shop.api.Migrations
                     b.HasKey("EventId");
 
                     b.ToTable("IEvents");
+                });
+
+            modelBuilder.Entity("shop.shared.ReadModel", b =>
+                {
+                    b.Property<Guid>("ReadModelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("At")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DomainModelType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ReadModelId");
+
+                    b.ToTable("ReadModels");
                 });
 #pragma warning restore 612, 618
         }
