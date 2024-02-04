@@ -9,7 +9,6 @@ public class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbContext(
     public DbSet<ReadModel> ReadModels { get; set; }
 }
 
-
 public record ReadModel(DateTimeOffset At, string DomainModelType, Guid Id, string Content)
 {
     [Key]
@@ -18,7 +17,6 @@ public record ReadModel(DateTimeOffset At, string DomainModelType, Guid Id, stri
 
 public record IEventEntity(
     List<Guid> ModelId,
-    DateTimeOffset AppliesAt,
     DateTimeOffset CreatedAt,
     List<string> DomainModelType,
     string EventType,

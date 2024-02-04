@@ -51,6 +51,31 @@ namespace shop.api.Migrations
 
                     b.ToTable("IEvents");
                 });
+
+            modelBuilder.Entity("shop.shared.ReadModel", b =>
+                {
+                    b.Property<Guid>("ReadModelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("At")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DomainModelType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ReadModelId");
+
+                    b.ToTable("ReadModels");
+                });
 #pragma warning restore 612, 618
         }
     }

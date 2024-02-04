@@ -10,8 +10,13 @@ public class FruitController(
     : ControllerBase
 {
     [HttpPost]
-    public void Post([FromBody] FruitPost fruit) => //validate and then
-        _fruitService.AddEvent(new CreateFruitEvent(Guid.NewGuid(), fruit.Name, fruit.Color));
+    public Fruit Post([FromBody] FruitPost fruit)
+    {
+        //validate and then
+        var guid = Guid.NewGuid();
+        _fruitService.AddEvent(new CreateFruitEvent(guid, fruit.Name, fruit.Color));
+        return new Fruit(guid, fruit.Name, fruit.Color);
+    }
 
     [HttpPatch("{id}")]
     public void Patch(Guid id, [FromBody] FruitPatch fruit) => //validate and then
