@@ -17,7 +17,7 @@ public class DomainService<T>(IEventStore _eventStore) : IDomainService<T> where
         .Events<T>()
         .GroupBy(f => f.ModelId)
         .Select(g => g.ToModel(at))
-        .Where(m => m != null)!;
+        .Where(m => m is not null)!;
 
     public T? Get(Guid id, DateTimeOffset? at = null) => _eventStore
         .EventsFor<T>(id)

@@ -25,9 +25,9 @@ else
     <MudTable Items="fruits" Hover="true" SortLabel="Sort By" Elevation="0">
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
-            <MudTd DataLabel="Name">@context.Name</MudTd>
-            <MudTd DataLabel="Color">@context.Color</MudTd>
-            <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Color">@context.Color</MudTd>
+                <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
                 <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
                 <MudTd DataLabel="Holdings">@context.Holdings</MudTd>
                 <MudButton @onclick="(() => OpenModifyOrCreateFruit(context))" Variant="Variant.Filled" Color="Color.Primary">
@@ -36,11 +36,11 @@ else
                 <MudButton @onclick="(() => DeleteFruit(context))" Variant="Variant.Filled" Color="Color.Error">
                     Delete
                 </MudButton>
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager PageSizeOptions="new int[]{50, 100}" />
-        </PagerContent>
-    </MudTable>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[]{50, 100}" />
+            </PagerContent>
+        </MudTable>
 }
 @code {
     private IEnumerable<Fruit>? fruits;
@@ -72,7 +72,7 @@ else
 
     private void RefreshList()
     {
-        fruits = FruitService.Get(selectedTime);
+        fruits = FruitService.Get(selectedTime).Where(f => f.State != eventsourcing.State.Deleted);
     }
 
     void OnDateChange(DateTime? newDate)
