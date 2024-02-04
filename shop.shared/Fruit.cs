@@ -6,77 +6,67 @@ public record Fruit(Guid Id, string Name, string Color) : DomainModel(Id)
     public int Holdings { get; init; }
 };
 
-public record CreateFruitEvent(Guid FruitId, string Name, string Color, DateTimeOffset AppliesAt) : EventBase, IEvent<Fruit>
+public record CreateFruitEvent(Guid FruitId, string Name, string Color) : EventBase, IEvent<Fruit>
 {
     public Guid ModelId { get; set; } = FruitId;
-    public DateTimeOffset AppliesAt { get; set; } = AppliesAt;
 
-    public Fruit? Apply(Fruit? existing)
+    public Fruit Apply(Fruit? existing)
     {
         return new Fruit(FruitId, Name, Color);
     }
 }
 
-public record UpdateFruitEvent(Guid FruitId, string? Color, DateTimeOffset AppliesAt) : EventBase, IEvent<Fruit>
+public record UpdateFruitEvent(Guid FruitId, string? Color) : EventBase, IEvent<Fruit>
 {
     public Guid ModelId { get; set; } = FruitId;
-    public DateTimeOffset AppliesAt { get; set; } = AppliesAt;
 
-    public Fruit? Apply(Fruit? existing)
+    public Fruit Apply(Fruit? existing)
     {
-        return existing is null ? null : existing with
+        return existing! with
         {
             Color = Color is null ? existing.Color : Color
         };
     }
 }
 
-public record DeleteFruitEvent(Guid FruitId, DateTimeOffset AppliesAt) : EventBase, IEvent<Fruit>
+public record DeleteFruitEvent(Guid FruitId) : EventBase, IEvent<Fruit>
 {
     public Guid ModelId { get; set; } = FruitId;
-    public DateTimeOffset AppliesAt { get; set; } = AppliesAt;
-    public Fruit? Apply(Fruit? existing)
+    public Fruit Apply(Fruit? existing)
     {
-        return null;
+        return existing! with { State = State.Deleted };
     }
 }
 
-public record DepositFruitEvent(Guid FruitId, int Amount, DateTimeOffset AppliesAt) : EventBase, IEvent<Fruit>
+public record DepositFruitEvent(Guid FruitId, int Amount) : EventBase, IEvent<Fruit>
 {
     public Guid ModelId { get; set; } = FruitId;
-    public DateTimeOffset AppliesAt { get; set; } = AppliesAt;
-    public Fruit? Apply(Fruit? existing)
+    public Fruit Apply(Fruit? existing)
     {
-        return existing is null ? null : existing with
+        return existing! with
         {
             Holdings = existing.Holdings + Amount
         };
     }
 }
 
-public record SellFruitEvent(Guid FruitId, Guid CustomerId, int Amount, DateTimeOffset AppliesAt)
+public record SellFruitEvent(Guid FruitId, Guid CustomerId, int Amount)
     : EventBase, IEvent<Fruit>, IEvent<Customer>
 {
     Guid IEvent<Customer>.ModelId { get; set; } = CustomerId;
     Guid IEvent<Fruit>.ModelId { get; set; } = FruitId;
-    public DateTimeOffset AppliesAt { get; set; } = AppliesAt;
 
-    public Fruit? Apply(Fruit? existing)
+    public Fruit Apply(Fruit? existing)
     {
-        return existing is null ? null : existing with
+        return existing! with
         {
             Holdings = existing.Holdings - Amount
         };
     }
 
-    public Customer? Apply(Customer? existing)
+    public Customer Apply(Customer? existing)
     {
-        if (existing == null)
-        {
-            return null;
-        }
-
-        return existing with 
+        return existing! with 
         { 
             Holdings = existing.Holdings + Amount
         };

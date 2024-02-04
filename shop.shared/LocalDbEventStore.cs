@@ -68,8 +68,7 @@ public class LocalDbEventStore : IEventStore
         }
 
         var entity = new IEventEntity(
-            modelIds,
-            e.AppliesAt, 
+            modelIds, 
             e.CreatedAt, 
             domainModelTypes.Select(t => t.FullName!).ToList(), 
             eventType.FullName!,

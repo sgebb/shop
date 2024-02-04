@@ -34,11 +34,11 @@
         IEvent<Fruit> e;
         if (!ExistingId.HasValue)
         {
-            e = new shared.CreateFruitEvent(Guid.NewGuid(), FruitName, FruitColor, DateTimeOffset.Now.AddDays(-1));   
+            e = new shared.CreateFruitEvent(Guid.NewGuid(), FruitName, FruitColor);   
         }
         else
         {
-            e = new shared.UpdateFruitEvent(ExistingId.Value, FruitColor, DateTimeOffset.Now.AddDays(-1));
+            e = new shared.UpdateFruitEvent(ExistingId.Value, FruitColor);
         }
 
         // Invoke the callback with the created NewFruitEvent
