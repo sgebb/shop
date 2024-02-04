@@ -67,8 +67,7 @@ public class LocalDbEventStore : IEventStore
         }
 
         var entity = new IEventEntity(
-            modelIds,
-            e.AppliesAt, 
+            modelIds, 
             e.CreatedAt, 
             domainModelTypes, 
             eventType.FullName!,
@@ -86,7 +85,6 @@ public class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbContext(
 
 public record IEventEntity(
     List<Guid> ModelId,
-    DateTimeOffset AppliesAt,
     DateTimeOffset CreatedAt, 
     List<string> DomainModelType,
     string EventType, 

@@ -34,11 +34,11 @@
         IEvent<Customer> e;
         if (!ExistingId.HasValue)
         {
-            e = new shared.NewCustomerEvent(Guid.NewGuid(), CustomerName, CustomerAddress, DateTimeOffset.Now.AddDays(-1));   
+            e = new shared.NewCustomerEvent(Guid.NewGuid(), CustomerName, CustomerAddress);   
         }
         else
         {
-            e = new shared.UpdateCustomerAddressEvent(ExistingId.Value, CustomerAddress, DateTimeOffset.Now.AddDays(-1));
+            e = new shared.UpdateCustomerAddressEvent(ExistingId.Value, CustomerAddress);
         }
 
         // Invoke the callback with the created NewCustomerEvent

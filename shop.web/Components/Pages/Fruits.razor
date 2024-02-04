@@ -60,7 +60,7 @@ else
 
     private void DeleteFruit(Fruit existing)
     {
-        var e = new DeleteFruitEvent(existing.Id, DateTimeOffset.Now.AddDays(-1));
+        var e = new DeleteFruitEvent(existing.Id);
         AddEvent(e);
     }
 

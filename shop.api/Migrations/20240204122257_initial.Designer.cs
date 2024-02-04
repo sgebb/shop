@@ -12,8 +12,8 @@ using shop.shared;
 namespace shop.api.Migrations
 {
     [DbContext(typeof(ShopDbContext))]
-    [Migration("20240122115128_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240204122257_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,14 +25,11 @@ namespace shop.api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("shop.shared.EventEntity", b =>
+            modelBuilder.Entity("shop.shared.IEventEntity", b =>
                 {
                     b.Property<Guid>("EventId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("AppliesAt")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -49,12 +46,13 @@ namespace shop.api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ModelId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("ModelId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("EventId");
 
-                    b.ToTable("Events");
+                    b.ToTable("IEvents");
                 });
 #pragma warning restore 612, 618
         }
