@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using shop.eventsourcing;
-using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Text.Json;
 
@@ -9,8 +8,9 @@ namespace shop.shared;
 public class LocalDbEventStore : IEventStore
 {
     private readonly ShopDbContext _shopDb;
+    private readonly IEventBus _eventBus;
 
-    public LocalDbEventStore(ShopDbContext shopDb)
+    public LocalDbEventStore(ShopDbContext shopDb, IEventBus eventBus)
     {
         _shopDb = shopDb;
 
@@ -19,6 +19,7 @@ public class LocalDbEventStore : IEventStore
         {
             _shopDb.Database.Migrate();
         }
+        _eventBus = eventBus;
     }
 
     private static T Deserialize<T>(IEventEntity e) where T : class
@@ -49,14 +50,14 @@ public class LocalDbEventStore : IEventStore
         Type eventType = e.GetType();
 
         List<Guid> modelIds = [];
-        List<string> domainModelTypes = [];
+        List<Type> domainModelTypes = [];
 
         foreach (Type interfaceType in eventType.GetInterfaces())
         {
             if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IEvent<>))
             {
                 Type modelType = interfaceType.GetGenericArguments()[0];
-                domainModelTypes.Add(modelType.FullName!);
+                domainModelTypes.Add(modelType);
                 PropertyInfo modelIdProperty = interfaceType.GetProperty("ModelId")!;
                 if (modelIdProperty != null)
                 {
@@ -70,28 +71,11 @@ public class LocalDbEventStore : IEventStore
             modelIds,
             e.AppliesAt, 
             e.CreatedAt, 
-            domainModelTypes, 
+            domainModelTypes.Select(t => t.FullName!).ToList(), 
             eventType.FullName!,
             JsonSerializer.Serialize(e, eventType));
         _shopDb.Add(entity);
+        _eventBus.Publish(new RefreshEvent(domainModelTypes, modelIds));
         _shopDb.SaveChanges();
     }
-}
-
-public class ShopDbContext(DbContextOptions<ShopDbContext> options) : DbContext(options)
-{
-    public DbSet<IEventEntity> IEvents { get; set; }
-
-}
-
-public record IEventEntity(
-    List<Guid> ModelId,
-    DateTimeOffset AppliesAt,
-    DateTimeOffset CreatedAt, 
-    List<string> DomainModelType,
-    string EventType, 
-    string Content)
-{
-    [Key]
-    public Guid EventId { get; set; }
 }

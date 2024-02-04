@@ -20,10 +20,38 @@ public static class SharedServiceCollectionExtensions
 
         services
             .AddTransient<IEventStore, LocalDbEventStore>()
-            .AddTransient<IDomainService<Fruit>, DomainService<Fruit>>()
-            .AddTransient<IDomainService<Customer>, DomainService<Customer>>()
-            ;
+            .AddSingleton<IEventBus, InMemoryEventBus>();
+
+        services.RegisterDomainDependencies();
 
         return services;
     }
+
+    public static IServiceCollection RegisterDomainDependencies(this IServiceCollection services)
+    {
+        var domainModelTypes = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(assembly => assembly.GetTypes())
+            .Where(type => typeof(DomainModel).IsAssignableFrom(type) && !type.IsAbstract);
+
+        foreach (var domainModelType in domainModelTypes)
+        {
+            var addMethod = typeof(SharedServiceCollectionExtensions)
+                .GetMethod(nameof(AddDomainTypeDependencies));
+
+            var genericMethod = addMethod.MakeGenericMethod(domainModelType);
+            genericMethod.Invoke(null, new object[] { services });
+        }
+
+        return services;
+    }
+
+    public static IServiceCollection AddDomainTypeDependencies<T>(this IServiceCollection services) where T : DomainModel
+    {
+        return services
+            .AddTransient<IDomainService<T>, DomainService<T>>()
+            .AddTransient<IQueryService<T>, QueryService<T>>()
+            .AddTransient<ICacheRefresher<T>, CacheRefresher<T>>()
+            .AddHostedService<CacheRefresher<T>>();
+    }
+
 }
