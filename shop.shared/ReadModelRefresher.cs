@@ -22,9 +22,9 @@ public class ReadModelRefresher<T>(
         var _domainService = scope.ServiceProvider.GetRequiredService<IDomainService<T>>();
         var historical = _domainService.GetHistorical();
 
-        await _shopDbContext.ReadModels
-            .Where(rm => rm.DomainModelType == typeof(T).FullName!)
-            .ExecuteDeleteAsync(cancellationToken: stoppingToken);
+        _shopDbContext.ReadModels.RemoveRange(
+            _shopDbContext.ReadModels.Where(rm => rm.DomainModelType == typeof(T).FullName!).AsEnumerable()
+            );
 
         await _shopDbContext.ReadModels.AddRangeAsync(
             historical.SelectMany(l =>
@@ -52,9 +52,9 @@ public class ReadModelRefresher<T>(
                 {
                     var historical = _domainService.GetHistorical(id);
 
-                    await _shopDbContext.ReadModels
-                        .Where(rm => rm.Id == id)
-                        .ExecuteDeleteAsync(cancellationToken: stoppingToken);
+                    _shopDbContext.ReadModels.RemoveRange(
+                        _shopDbContext.ReadModels.Where(rm => rm.DomainModelType == typeof(T).FullName!).AsEnumerable()
+                        );
 
                     var idHolder = historical.FirstOrDefault(m => m?.Id != null);
 
