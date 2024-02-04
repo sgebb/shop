@@ -72,7 +72,7 @@ else
 
     private void RefreshList()
     {
-        fruits = FruitService.Get(selectedTime);
+        fruits = FruitService.Get(selectedTime).Where(f => f.State != eventsourcing.State.Deleted);
     }
 
     void OnDateChange(DateTime? newDate)
