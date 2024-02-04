@@ -4,6 +4,7 @@
 @attribute [StreamRendering]
 @inject IDomainService<Customer> CustomerService
 @inject IDialogService DialogService
+@inject IQueryService<Customer> CustomerQueryService
 
 <MyMudProviders />
 
@@ -63,7 +64,7 @@ else
 
     private void RefreshList()
     {
-        customers = CustomerService.Get(selectedTime);
+        customers = CustomerQueryService.Get(selectedTime);
     }
 
     void OnDateChange(DateTime? newDate)

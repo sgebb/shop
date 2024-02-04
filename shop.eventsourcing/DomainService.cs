@@ -30,8 +30,7 @@ public class DomainService<T>(IEventStore _eventStore) : IDomainService<T> where
     public IEnumerable<IEnumerable<T>> GetHistorical() => _eventStore
         .Events<T>()
         .GroupBy(f => f.ModelId)
-        .Select(g => g.ToModelHistorical())
-        .Where(f => f is not null);
+        .Select(g => g.ToModelHistorical());
 
     public void AddEvent(IEvent<T> e) => _eventStore
         .AddEvent(e);

@@ -5,21 +5,22 @@ namespace shop.shared;
 
 public interface IQueryService<T> where T : DomainModel
 {
-    IEnumerable<T?> Get(DateTimeOffset? at = null);
+    IEnumerable<T> Get(DateTimeOffset? at = null);
     T? Get(Guid id, DateTimeOffset? at = null);
-    IEnumerable<T?> GetHistorical(Guid id);
-    IEnumerable<IEnumerable<T?>> GetHistorical();
+    IEnumerable<T> GetHistorical(Guid id);
+    IEnumerable<IEnumerable<T>> GetHistorical();
 }
 
 public class QueryService<T>(
     ShopDbContext _shopDbContext)
     : IQueryService<T> where T : DomainModel
 {
-    public IEnumerable<T?> Get(DateTimeOffset? at = null)
+    public IEnumerable<T> Get(DateTimeOffset? at = null)
     {
         var historical = GetHistorical();
         return historical.Select(h =>
-            h.LastOrDefault(t => (at ?? DateTimeOffset.MaxValue) >= t.UpdatedAt));
+            h.LastOrDefault(t => (at ?? DateTimeOffset.MaxValue) >= t.UpdatedAt))
+            .Where(m => m is not null)!;
     }
 
     public T? Get(Guid id, DateTimeOffset? at = null)
@@ -29,19 +30,19 @@ public class QueryService<T>(
             .LastOrDefault(t => (at ?? DateTimeOffset.MaxValue) >= t.UpdatedAt);
     }
 
-    public IEnumerable<T?> GetHistorical(Guid id) =>
+    public IEnumerable<T> GetHistorical(Guid id) =>
         _shopDbContext.ReadModels
             .Where(rm => rm.DomainModelType == typeof(T).FullName!)
             .Where(rm => rm.Id == id)
             .OrderBy(rm => rm.At)
             .ToList()
-            .Select(rm => JsonSerializer.Deserialize<T>(rm.Content));
+            .Select(rm => JsonSerializer.Deserialize<T>(rm.Content)!);
 
-    public IEnumerable<IEnumerable<T?>> GetHistorical() =>
+    public IEnumerable<IEnumerable<T>> GetHistorical() =>
         _shopDbContext.ReadModels
             .Where(rm => rm.DomainModelType == typeof(T).FullName!)
             .OrderBy(rm => rm.At)
             .GroupBy(rm => rm.Id)
             .ToList()
-            .Select(g => g.Select(rm => JsonSerializer.Deserialize<T>(rm.Content)));
+            .Select(g => g.Select(rm => JsonSerializer.Deserialize<T>(rm.Content)!));
 }
