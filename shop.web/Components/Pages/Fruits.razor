@@ -42,6 +42,15 @@ else
             </PagerContent>
         </MudTable>
 }
+
+<MudButton @onclick="(() => DepositFruit())" Variant="Variant.Filled" Color="Color.Primary">
+    Deposit fruit
+</MudButton>
+
+<MudButton @onclick="(() => SellFruit())" Variant="Variant.Filled" Color="Color.Primary">
+    Sell fruit
+</MudButton>
+
 @code {
     private IEnumerable<Fruit>? fruits;
     public DateTime? selectedTime = DateTime.Now.Date.AddDays(1);
@@ -57,6 +66,23 @@ else
         var options = new DialogOptions { CloseOnEscapeKey = true };
         DialogService.Show<MutableFruitDialog>(existing is null ? "New Fruit" : "Update Fruit", parameters, options);
     }
+
+    private void SellFruit()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("OnOkEvent", (Action<eventsourcing.IEvent<Fruit>>)(e => AddEvent(e)));
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<SellFruitDialog>("Sell fruit", parameters, options);
+    }
+
+    private void DepositFruit()
+    {
+        var parameters = new DialogParameters();
+        parameters.Add("OnOkEvent", (Action<eventsourcing.IEvent<Fruit>>)(e => AddEvent(e)));
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        DialogService.Show<DepositFruitDialog>("Deposit fruit", parameters, options);
+    }
+
 
     private void DeleteFruit(Fruit existing)
     {

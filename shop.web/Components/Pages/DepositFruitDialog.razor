@@ -1,0 +1,53 @@
+@using shop.eventsourcing
+@using shop.shared
+
+@inject IDomainService<Fruit> FruitQueryService
+
+<MudDialog>
+    <TitleContent>Deposit fruit</TitleContent>
+    <DialogContent>
+        <MudSelect @bind-Value="selectedFruit" T="Fruit" Label="Fruit" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+            @foreach (var item in FruitQueryService.Get())
+            {
+                <MudSelectItem Value="@item">@item.Name: @item.Holdings</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSlider @bind-Value="selectedAmount" Min="20" Max="80" Color="Color.Info">Value: @selectedAmount.ToString()</MudSlider>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    private Fruit? selectedFruit;
+    private int selectedAmount;
+
+    [Parameter] public Action<eventsourcing.IEvent<shared.Fruit>> OnOkEvent { get; set; }
+
+
+    void Submit()
+    {
+        // Validate the input if needed
+        if (selectedFruit == null || selectedAmount <= 0)
+        {
+            // You can show an error message or prevent submission
+            return;
+        }
+
+        var e = new DepositFruitEvent(selectedFruit.Id, selectedAmount);
+
+        // Invoke the callback with the created NewFruitEvent
+        OnOkEvent?.Invoke(e);
+
+        // Close the dialog
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+}
