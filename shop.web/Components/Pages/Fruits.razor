@@ -6,6 +6,7 @@
 @inject IEventBus EventBus
 @inject IDialogService DialogService
 @inject IQueryService<Fruit> FruitQueryService
+@inject IReadModelRefresher<Fruit> FruitRefresher
 
 <MyMudProviders />
 
@@ -14,7 +15,7 @@
 <MudText Typo="Typo.h3" GutterBottom="true">Fruits</MudText>
 <MudDatePicker Label="Fruits at date:" DateChanged="OnDateChange" />
 
-<MudButton @onclick="(() => OpenModifyOrCreateFruit(null))" Variant="Variant.Filled" Color="Color.Primary">
+<MudButton @onclick="(async () => await OpenModifyOrCreateFruit(null))" Variant="Variant.Filled" Color="Color.Primary">
     New Fruit
 </MudButton>
 
@@ -35,7 +36,7 @@ else
                 <MudButton @onclick="(async () => await OpenModifyOrCreateFruit(context))" Variant="Variant.Filled" Color="Color.Primary">
                     Update
                 </MudButton>
-                <MudButton @onclick="(() => DeleteFruit(context))" Variant="Variant.Filled" Color="Color.Error">
+                <MudButton @onclick="(async () => await DeleteFruit(context))" Variant="Variant.Filled" Color="Color.Error">
                     Delete
                 </MudButton>
             </RowTemplate>
@@ -53,6 +54,10 @@ else
     Sell fruit
 </MudButton>
 
+<MudButton @onclick="(async () => await RefreshCache())" Variant="Variant.Filled" Color="Color.Primary">
+    Refresh fruitcache
+</MudButton>
+
 @code {
     private IEnumerable<Fruit>? fruits;
     public DateTime? selectedTime = DateTime.Now.Date.AddDays(1);
@@ -68,7 +73,7 @@ else
         var dialogRef = DialogService.Show<MutableFruitDialog>(existing is null ? "New Fruit" : "Update Fruit", parameters, options);
         if ((await dialogRef.Result).Data is IEvent<Fruit> e)
         {
-            AddEvent(e);
+            await AddEvent(e);
         }
     }
 
@@ -79,50 +84,54 @@ else
         var dialogRef = DialogService.Show<SellFruitDialog>("Sell fruit", parameters, options);
         if ((await dialogRef.Result).Data is IEvent<Fruit> e)
         {
-            AddEvent(e);
+            await AddEvent(e);
         }
     }
 
     private async Task DepositFruit()
     {
-        // var parameters = new DialogParameters();
-        // parameters.Add("OnOkEvent", (Action<IEvent<Fruit>>)(e => AddEvent(e)));
         var options = new DialogOptions { CloseOnEscapeKey = true };
         var dialogRef = DialogService.Show<DepositFruitDialog>("Deposit fruit", options);
         if ((await dialogRef.Result).Data is IEvent<Fruit> e)
         {
-            AddEvent(e);
+            await AddEvent(e);
         }
     }
 
 
-    private void DeleteFruit(Fruit existing)
+    private async Task DeleteFruit(Fruit existing)
     {
         var e = new DeleteFruitEvent(existing.Id);
-        AddEvent(e);
+        await AddEvent(e);
     }
 
-    private void AddEvent(eventsourcing.IEvent<Fruit> newFruitEvent)
+    private async Task AddEvent(eventsourcing.IEvent<Fruit> newFruitEvent)
     {
         EventBus.Publish(newFruitEvent);
-        RefreshList();
+        await RefreshList();
     }
 
-    private void RefreshList()
+    private async Task RefreshList()
     {
+
+        await Task.Delay(350);
         fruits = FruitQueryService.Get(selectedTime).Where(f => f.State != eventsourcing.State.Deleted);
     }
 
-    void OnDateChange(DateTime? newDate)
+    private async Task RefreshCache()
+    {
+        await FruitRefresher.RefreshCache(CancellationToken.None);
+        await RefreshList();
+    }
+
+    async Task OnDateChange(DateTime? newDate)
     {
         selectedTime = newDate!.Value.Date.AddDays(1);
-        RefreshList();
+        await RefreshList();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
-        RefreshList();
+        await RefreshList();
     }
 }

@@ -6,6 +6,7 @@
 @inject IEventBus EventBus
 @inject IDialogService DialogService
 @inject IQueryService<Customer> CustomerQueryService
+@inject IReadModelRefresher<Customer> CustomerRefresher
 
 <MyMudProviders />
 
@@ -14,7 +15,7 @@
 <MudText Typo="Typo.h3" GutterBottom="true">Customers</MudText>
 <MudDatePicker Label="Customers at date:" DateChanged="OnDateChange" />
 
-<MudButton @onclick="(() => OpenModifyOrCreateCustomer(null))" Variant="Variant.Filled" Color="Color.Primary">
+<MudButton @onclick="(async () => await OpenModifyOrCreateCustomer(null))" Variant="Variant.Filled" Color="Color.Primary">
     New Customer
 </MudButton>
 
@@ -32,7 +33,7 @@ else
             <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
             <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
             <MudTd DataLabel="Holdings">@context.Holdings</MudTd>
-            <MudButton @onclick="(() => OpenModifyOrCreateCustomer(context))" Variant="Variant.Filled" Color="Color.Primary">
+            <MudButton @onclick="(async () => await OpenModifyOrCreateCustomer(context))" Variant="Variant.Filled" Color="Color.Primary">
                 Update
             </MudButton>
         </RowTemplate>
@@ -40,6 +41,11 @@ else
             <MudTablePager PageSizeOptions="new int[]{50, 100}" />
         </PagerContent>
     </MudTable>
+
+
+    <MudButton @onclick="(async () => await RefreshCache())" Variant="Variant.Filled" Color="Color.Primary">
+        Refresh customcache
+    </MudButton>
 }
 @code {
     private IEnumerable<Customer>? customers;
@@ -56,31 +62,37 @@ else
         var dialogRef = DialogService.Show<MutableCustomerDialog>(existing is null ? "New Customer" : "Update Customer", parameters, options);
         if ((await dialogRef.Result).Data is IEvent<Customer> e)
         {
-            AddEvent(e);
+            await AddEvent(e);
         }
     }
 
-    private void AddEvent(IEvent<Customer> newCustomerEvent)
+    private async Task AddEvent(IEvent<Customer> newCustomerEvent)
     {
         EventBus.Publish(newCustomerEvent);
-        RefreshList();
+        await RefreshList();
     }
 
-    private void RefreshList()
+
+    private async Task RefreshCache()
     {
+        await CustomerRefresher.RefreshCache(CancellationToken.None);
+        await RefreshList();
+    }
+
+    private async Task RefreshList()
+    {
+        await Task.Delay(350);
         customers = CustomerQueryService.Get(selectedTime);
     }
 
-    void OnDateChange(DateTime? newDate)
+    async Task OnDateChange(DateTime? newDate)
     {
         selectedTime = newDate!.Value.Date.AddDays(1);
-        RefreshList();
+        await RefreshList();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
-        RefreshList();
+        await RefreshList();
     }
 }

@@ -1,8 +1,8 @@
 @using shop.eventsourcing
 @using shop.shared
 
-@inject IDomainService<Fruit> FruitQueryService
-@inject IDomainService<Customer> CustomerQueryService
+@inject IQueryService<Fruit> FruitQueryService
+@inject IQueryService<Customer> CustomerQueryService
 
 <MudDialog>
     <TitleContent>Sell fruit</TitleContent>
