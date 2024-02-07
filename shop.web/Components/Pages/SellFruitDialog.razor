@@ -1,0 +1,61 @@
+@using shop.eventsourcing
+@using shop.shared
+
+@inject IDomainService<Fruit> FruitQueryService
+@inject IDomainService<Customer> CustomerQueryService
+
+<MudDialog>
+    <TitleContent>Sell fruit</TitleContent>
+    <DialogContent>
+        <MudSelect @bind-Value="selectedFruit" T="Fruit" Label="Fruit" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+            @foreach (var item in FruitQueryService.Get().Where(f => f.State != State.Deleted))
+            {
+                <MudSelectItem Value="@item">@item.Name: @item.Holdings</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect @bind-Value="selectedCustomer" T="Customer" Label="Customer" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
+            @foreach (var item in CustomerQueryService.Get().Where(f => f.State != State.Deleted))
+            {
+                <MudSelectItem Value="@item">@item.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSlider @bind-Value="selectedAmount" Min="0" Max="@FruitHoldings()" Color="Color.Info">Value: @selectedAmount.ToString()</MudSlider>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+    @code {
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    private Fruit? selectedFruit;
+    private Customer? selectedCustomer;
+    private int selectedAmount;
+
+    private int FruitHoldings()
+    {
+        return selectedFruit?.Holdings ?? 0;
+    }
+
+
+    void Submit()
+    {
+        // Validate the input if needed
+        if (selectedFruit == null || selectedCustomer == null || selectedAmount <= 0)
+        {
+            // You can show an error message or prevent submission
+            return;
+        }
+
+        var e = new SellFruitEvent(selectedFruit.Id, selectedCustomer.Id, selectedAmount);
+
+        // Close the dialog
+        MudDialog.Close(DialogResult.Ok(e));
+    }
+
+    void Cancel() => MudDialog.Cancel();
+
+}

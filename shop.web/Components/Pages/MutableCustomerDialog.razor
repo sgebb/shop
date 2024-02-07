@@ -20,7 +20,6 @@
     [Parameter] public Guid? ExistingId { get; set; }
     [Parameter] public string? CustomerName { get; set; }
     [Parameter] public string? CustomerAddress { get; set; }
-    [Parameter] public Action<eventsourcing.IEvent<shared.Customer>> OnOkEvent { get; set; }
 
     void Submit()
     {
@@ -41,11 +40,9 @@
             e = new shared.UpdateCustomerAddressEvent(ExistingId.Value, CustomerAddress);
         }
 
-        // Invoke the callback with the created NewCustomerEvent
-        OnOkEvent?.Invoke(e);
 
         // Close the dialog
-        MudDialog.Close(DialogResult.Ok(true));
+        MudDialog.Close(DialogResult.Ok(e));
     }
 
     void Cancel() => MudDialog.Cancel();

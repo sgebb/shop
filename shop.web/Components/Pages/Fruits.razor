@@ -1,5 +1,6 @@
 ﻿@page "/fruits"
 @rendermode InteractiveServer
+@using shop.eventsourcing
 @using shop.shared
 @attribute [StreamRendering]
 @inject IEventBus EventBus
@@ -31,7 +32,7 @@ else
                 <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
                 <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
                 <MudTd DataLabel="Holdings">@context.Holdings</MudTd>
-                <MudButton @onclick="(() => OpenModifyOrCreateFruit(context))" Variant="Variant.Filled" Color="Color.Primary">
+                <MudButton @onclick="(async () => await OpenModifyOrCreateFruit(context))" Variant="Variant.Filled" Color="Color.Primary">
                     Update
                 </MudButton>
                 <MudButton @onclick="(() => DeleteFruit(context))" Variant="Variant.Filled" Color="Color.Error">
@@ -43,21 +44,57 @@ else
             </PagerContent>
         </MudTable>
 }
+
+<MudButton @onclick="(async () => await DepositFruit())" Variant="Variant.Filled" Color="Color.Primary">
+    Deposit fruit
+</MudButton>
+
+<MudButton @onclick="(async () => await SellFruit())" Variant="Variant.Filled" Color="Color.Primary">
+    Sell fruit
+</MudButton>
+
 @code {
     private IEnumerable<Fruit>? fruits;
     public DateTime? selectedTime = DateTime.Now.Date.AddDays(1);
 
-    private void OpenModifyOrCreateFruit(Fruit? existing = null)
+    private async Task OpenModifyOrCreateFruit(Fruit? existing = null)
     {
         var parameters = new DialogParameters();
         parameters.Add("FruitName", existing?.Name);
         parameters.Add("FruitColor", existing?.Color);
         parameters.Add("ExistingId", existing?.Id);
 
-        parameters.Add("OnOkEvent", (Action<eventsourcing.IEvent<Fruit>>)(e => AddEvent(e)));
         var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<MutableFruitDialog>(existing is null ? "New Fruit" : "Update Fruit", parameters, options);
+        var dialogRef = DialogService.Show<MutableFruitDialog>(existing is null ? "New Fruit" : "Update Fruit", parameters, options);
+        if ((await dialogRef.Result).Data is IEvent<Fruit> e)
+        {
+            AddEvent(e);
+        }
     }
+
+    private async Task SellFruit()
+    {
+        var parameters = new DialogParameters();
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialogRef = DialogService.Show<SellFruitDialog>("Sell fruit", parameters, options);
+        if ((await dialogRef.Result).Data is IEvent<Fruit> e)
+        {
+            AddEvent(e);
+        }
+    }
+
+    private async Task DepositFruit()
+    {
+        // var parameters = new DialogParameters();
+        // parameters.Add("OnOkEvent", (Action<IEvent<Fruit>>)(e => AddEvent(e)));
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialogRef = DialogService.Show<DepositFruitDialog>("Deposit fruit", options);
+        if ((await dialogRef.Result).Data is IEvent<Fruit> e)
+        {
+            AddEvent(e);
+        }
+    }
+
 
     private void DeleteFruit(Fruit existing)
     {
