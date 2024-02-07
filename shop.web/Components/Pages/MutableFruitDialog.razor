@@ -20,7 +20,6 @@
     [Parameter] public Guid? ExistingId { get; set; }
     [Parameter] public string? FruitName { get; set; }
     [Parameter] public string? FruitColor { get; set; }
-    [Parameter] public Action<eventsourcing.IEvent<shared.Fruit>> OnOkEvent { get; set; }
 
     void Submit()
     {
@@ -41,11 +40,8 @@
             e = new shared.UpdateFruitEvent(ExistingId.Value, FruitColor);
         }
 
-        // Invoke the callback with the created NewFruitEvent
-        OnOkEvent?.Invoke(e);
-
         // Close the dialog
-        MudDialog.Close(DialogResult.Ok(true));
+        MudDialog.Close(DialogResult.Ok(e));
     }
 
     void Cancel() => MudDialog.Cancel();

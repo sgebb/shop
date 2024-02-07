@@ -8,13 +8,13 @@
     <TitleContent>Sell fruit</TitleContent>
     <DialogContent>
         <MudSelect @bind-Value="selectedFruit" T="Fruit" Label="Fruit" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-            @foreach (var item in FruitQueryService.Get())
+            @foreach (var item in FruitQueryService.Get().Where(f => f.State != State.Deleted))
             {
                 <MudSelectItem Value="@item">@item.Name: @item.Holdings</MudSelectItem>
             }
         </MudSelect>
         <MudSelect @bind-Value="selectedCustomer" T="Customer" Label="Customer" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-            @foreach (var item in CustomerQueryService.Get())
+            @foreach (var item in CustomerQueryService.Get().Where(f => f.State != State.Deleted))
             {
                 <MudSelectItem Value="@item">@item.Name</MudSelectItem>
             }
@@ -40,13 +40,11 @@
         return selectedFruit?.Holdings ?? 0;
     }
 
-    [Parameter] public Action<eventsourcing.IEvent<shared.Fruit>> OnOkEvent { get; set; }
-
 
     void Submit()
     {
         // Validate the input if needed
-        if (selectedFruit == null || selectedCustomer == null)
+        if (selectedFruit == null || selectedCustomer == null || selectedAmount <= 0)
         {
             // You can show an error message or prevent submission
             return;
@@ -54,11 +52,8 @@
 
         var e = new SellFruitEvent(selectedFruit.Id, selectedCustomer.Id, selectedAmount);
 
-        // Invoke the callback with the created NewFruitEvent
-        OnOkEvent?.Invoke(e);
-
         // Close the dialog
-        MudDialog.Close(DialogResult.Ok(true));
+        MudDialog.Close(DialogResult.Ok(e));
     }
 
     void Cancel() => MudDialog.Cancel();

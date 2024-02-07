@@ -1,5 +1,6 @@
 ﻿@page "/customers"
 @rendermode InteractiveServer
+@using shop.eventsourcing
 @using shop.shared
 @attribute [StreamRendering]
 @inject IDomainService<Customer> CustomerService
@@ -43,19 +44,22 @@ else
     private IEnumerable<Customer>? customers;
     public DateTime? selectedTime = DateTime.Now.Date.AddDays(1);
 
-    private void OpenModifyOrCreateCustomer(Customer? existing = null)
+    private async Task OpenModifyOrCreateCustomer(Customer? existing = null)
     {
         var parameters = new DialogParameters();
         parameters.Add("CustomerName", existing?.Name);
         parameters.Add("CustomerAddress", existing?.Address);
         parameters.Add("ExistingId", existing?.Id);
 
-        parameters.Add("OnOkEvent", (Action<eventsourcing.IEvent<Customer>>)(e => AddEvent(e)));
         var options = new DialogOptions { CloseOnEscapeKey = true };
-        DialogService.Show<MutableCustomerDialog>(existing is null ? "New Customer" : "Update Customer", parameters, options);
+        var dialogRef = DialogService.Show<MutableCustomerDialog>(existing is null ? "New Customer" : "Update Customer", parameters, options);
+        if ((await dialogRef.Result).Data is IEvent<Customer> e)
+        {
+            AddEvent(e);
+        }
     }
 
-    private void AddEvent(eventsourcing.IEvent<Customer> newCustomerEvent)
+    private void AddEvent(IEvent<Customer> newCustomerEvent)
     {
         CustomerService.AddEvent(newCustomerEvent);
         RefreshList();

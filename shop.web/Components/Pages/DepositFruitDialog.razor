@@ -7,7 +7,7 @@
     <TitleContent>Deposit fruit</TitleContent>
     <DialogContent>
         <MudSelect @bind-Value="selectedFruit" T="Fruit" Label="Fruit" Variant="Variant.Filled" AnchorOrigin="Origin.BottomCenter">
-            @foreach (var item in FruitQueryService.Get())
+            @foreach (var item in FruitQueryService.Get().Where(f => f.State != State.Deleted))
             {
                 <MudSelectItem Value="@item">@item.Name: @item.Holdings</MudSelectItem>
             }
@@ -27,9 +27,6 @@
     private Fruit? selectedFruit;
     private int selectedAmount;
 
-    [Parameter] public Action<eventsourcing.IEvent<shared.Fruit>> OnOkEvent { get; set; }
-
-
     void Submit()
     {
         // Validate the input if needed
@@ -41,11 +38,8 @@
 
         var e = new DepositFruitEvent(selectedFruit.Id, selectedAmount);
 
-        // Invoke the callback with the created NewFruitEvent
-        OnOkEvent?.Invoke(e);
-
         // Close the dialog
-        MudDialog.Close(DialogResult.Ok(true));
+        MudDialog.Close(DialogResult.Ok(e));
     }
 
     void Cancel() => MudDialog.Cancel();
