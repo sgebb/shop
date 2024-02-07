@@ -40,7 +40,7 @@ public class ReadModelRefresher<T>(
         var events = _bus.Subscribe<RefreshEvent>();
         await foreach (var e in events)
         {
-            await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
 
             using var scope = _scopeFactory.CreateScope();
             var _shopDbContext = scope.ServiceProvider.GetRequiredService<ShopDbContext>();
@@ -53,7 +53,7 @@ public class ReadModelRefresher<T>(
                     var historical = _domainService.GetHistorical(id);
 
                     _shopDbContext.ReadModels.RemoveRange(
-                        _shopDbContext.ReadModels.Where(rm => rm.DomainModelType == typeof(T).FullName!).AsEnumerable()
+                        _shopDbContext.ReadModels.Where(rm => rm.DomainModelType == typeof(T).FullName! && rm.Id == id).AsEnumerable()
                         );
 
                     var idHolder = historical.FirstOrDefault(m => m?.Id != null);
