@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using shop.eventsourcing;
 using System.Text.Json;
@@ -40,8 +39,6 @@ public class ReadModelRefresher<T>(
         var events = _bus.Subscribe<RefreshEvent>();
         await foreach (var e in events)
         {
-            //await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
-
             using var scope = _scopeFactory.CreateScope();
             var _shopDbContext = scope.ServiceProvider.GetRequiredService<ShopDbContext>();
             var _domainService = scope.ServiceProvider.GetRequiredService<IDomainService<T>>();
@@ -63,6 +60,7 @@ public class ReadModelRefresher<T>(
                     , stoppingToken);
 
                     await _shopDbContext.SaveChangesAsync(stoppingToken);
+                    await _bus.PublishAsync(new ReadModelsUpdated(typeof(T), id));
                 }
                 catch (Exception)
                 {

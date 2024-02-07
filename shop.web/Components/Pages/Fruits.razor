@@ -107,15 +107,12 @@ else
 
     private async Task AddEvent(eventsourcing.IEvent<Fruit> newFruitEvent)
     {
-        EventBus.Publish(newFruitEvent);
-        await RefreshList();
+        await EventBus.PublishAsync(newFruitEvent);
     }
 
     private async Task RefreshList()
     {
-
-        await Task.Delay(350);
-        fruits = FruitQueryService.Get(selectedTime).Where(f => f.State != eventsourcing.State.Deleted);
+        fruits = await Task.FromResult(FruitQueryService.Get(selectedTime).Where(f => f.State != eventsourcing.State.Deleted));
     }
 
     private async Task RefreshCache()
@@ -132,6 +129,17 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        _ = Task.Run(async () =>
+        {
+            await foreach (var e in EventBus.Subscribe<ReadModelsUpdated>())
+            {
+                if (e.DomainModelType == typeof(Fruit))
+                {
+                    await RefreshList();
+                    await InvokeAsync(() => StateHasChanged());
+                }
+            }
+        });
         await RefreshList();
     }
 }

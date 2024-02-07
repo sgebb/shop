@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using shop.eventsourcing;
 using shop.shared;
 
 namespace shop.api.Controllers;
@@ -10,12 +11,12 @@ public class CustomerController(
     : ControllerBase
 {
     [HttpPost]
-    public void Post([FromBody] CustomerPost Customer) => //validate and then
-        _eventBus.Publish(new NewCustomerEvent(Guid.NewGuid(), Customer.Name, Customer.Address));
+    public  Task Post([FromBody] CustomerPost Customer) => //validate and then
+        _eventBus.PublishAsync(new NewCustomerEvent(Guid.NewGuid(), Customer.Name, Customer.Address));
 
     [HttpPatch("{id}")]
-    public void Patch(Guid id, [FromBody] CustomerPatch Customer) => //validate and then
-        _eventBus.Publish(new UpdateCustomerAddressEvent(id, Customer.Address));
+    public Task Patch(Guid id, [FromBody] CustomerPatch Customer) => //validate and then
+        _eventBus.PublishAsync(new UpdateCustomerAddressEvent(id, Customer.Address));
 }
 
 public record CustomerPatch(string Address);

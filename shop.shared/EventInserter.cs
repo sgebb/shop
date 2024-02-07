@@ -20,7 +20,7 @@ public class EventInserter(
             eventStore.AddEvent(e);
 
             var (domainModelTypes, modelIds) = e.GetTypeAndModelData();
-            _bus.Publish(new RefreshEvent(domainModelTypes, modelIds));
+            await _bus.PublishAsync(new RefreshEvent(domainModelTypes, modelIds));
         }
     }
 }

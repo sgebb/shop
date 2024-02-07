@@ -1,25 +1,21 @@
-﻿using System.Collections.Concurrent;
+﻿using shop.eventsourcing;
+using System.Collections.Concurrent;
 using System.Threading.Channels;
 
 namespace shop.shared;
 
 public record RefreshEvent(IEnumerable<Type> Types, IEnumerable<Guid> Ids);
-
-public interface IEventBus
-{
-    IAsyncEnumerable<T> Subscribe<T>();
-    void Publish<T>(T e);
-}
+public record ReadModelsUpdated(Type DomainModelType, Guid DomainModelId);
 
 public class InMemoryEventBus : IEventBus
 {
     private readonly ConcurrentBag<ChannelWriter<object>> writers = [];
 
-    public void Publish<T>(T e)
+    public async Task PublishAsync<T>(T e)
     {
         foreach (var writer in writers)
         {
-            writer.TryWrite(e);
+            await writer.WriteAsync(e!);
         }
     }
 

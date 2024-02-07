@@ -68,7 +68,7 @@ else
 
     private async Task AddEvent(IEvent<Customer> newCustomerEvent)
     {
-        EventBus.Publish(newCustomerEvent);
+        await EventBus.PublishAsync(newCustomerEvent);
         await RefreshList();
     }
 
@@ -81,11 +81,10 @@ else
 
     private async Task RefreshList()
     {
-        await Task.Delay(350);
-        customers = CustomerQueryService.Get(selectedTime);
+        customers = await Task.FromResult(CustomerQueryService.Get(selectedTime));
     }
 
-    async Task OnDateChange(DateTime? newDate)
+    private async Task OnDateChange(DateTime? newDate)
     {
         selectedTime = newDate!.Value.Date.AddDays(1);
         await RefreshList();
@@ -93,6 +92,17 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        _ = Task.Run(async () =>
+        {
+            await foreach (var e in EventBus.Subscribe<ReadModelsUpdated>())
+            {
+                if (e.DomainModelType == typeof(Customer))
+                {
+                    await RefreshList();
+                    await InvokeAsync(() => StateHasChanged());
+                }
+            }
+        });
         await RefreshList();
     }
 }
