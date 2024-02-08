@@ -12,12 +12,11 @@
 <PageTitle>Customers</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Customers</MudText>
-<MudDatePicker Label="Customers at date:" DateChanged="OnDateChange" />
+<DateTimePicker Label="Customers at date:" ValueChanged="OnDateChange" />
 
 <MudButton @onclick="(() => OpenModifyOrCreateCustomer(null))" Variant="Variant.Filled" Color="Color.Primary">
     New Customer
 </MudButton>
-
 @if (customerListObjects == null)
 {
     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
@@ -43,7 +42,7 @@ else
 }
 @code {
     private IEnumerable<CustomerObject>? customerListObjects;
-    public DateTime? selectedTime = DateTime.Now.Date.AddDays(1);
+    public DateTimeOffset? selectedTime = DateTimeOffset.Now.Date.AddDays(1);
 
     private async Task OpenModifyOrCreateCustomer(CustomerObject? existing = null)
     {
@@ -85,9 +84,15 @@ else
         });
     }
 
-    void OnDateChange(DateTime? newDate)
+    // void OnDateChange(DateTimeOffset? newDate)
+    // {
+    //     selectedTime = newDate!.Value.Date.AddDays(1);
+    //     RefreshList();
+    // }
+
+    async Task OnDateChange(DateTimeOffset newDate)
     {
-        selectedTime = newDate!.Value.Date.AddDays(1);
+        selectedTime = newDate;
         RefreshList();
     }
 
