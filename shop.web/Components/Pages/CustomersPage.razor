@@ -101,7 +101,7 @@ else
     async Task OnDateChange(DateTimeOffset newDate)
     {
         selectedTime = newDate;
-        RefreshList();
+        await RefreshList();
     }
 
     protected override async Task OnInitializedAsync()

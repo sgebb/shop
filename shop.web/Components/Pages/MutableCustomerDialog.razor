@@ -3,7 +3,7 @@
 <MudDialog>
     <TitleContent>New Customer</TitleContent>
     <DialogContent>
-        <MudTextField Label="Name" @bind-Value="CustomerName" Required="true" />
+        <MudTextField Label="Name" @bind-Value="CustomerName" Required="true" ReadOnly="HasExisting()" Disabled="HasExisting()" />
         <MudTextField Label="Address" @bind-Value="CustomerAddress" />
     </DialogContent>
     <DialogActions>
@@ -20,6 +20,11 @@
     [Parameter] public Guid? ExistingId { get; set; }
     [Parameter] public string? CustomerName { get; set; }
     [Parameter] public string? CustomerAddress { get; set; }
+
+    bool HasExisting()
+    {
+        return ExistingId is not null;
+    }
 
     void Submit()
     {
