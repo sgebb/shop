@@ -66,9 +66,12 @@ public record SellFruitEvent(Guid FruitId, Guid CustomerId, int Amount)
 
     public Customer Apply(Customer? existing)
     {
-        return existing! with 
-        { 
-            Holdings = existing.Holdings + Amount
-        };
+        int sum = Amount;
+        if(existing!.Holdings.TryGetValue(FruitId, out var holdings))
+        {
+            sum += holdings;
+        }
+        existing.Holdings[FruitId] = sum;
+        return existing;
     }
 }

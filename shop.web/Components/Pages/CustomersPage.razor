@@ -4,6 +4,7 @@
 @using shop.shared
 @attribute [StreamRendering]
 @inject IDomainService<Customer> CustomerService
+@inject IDomainService<Fruit> FruitService
 @inject IDialogService DialogService
 
 <MyMudProviders />
@@ -17,34 +18,34 @@
     New Customer
 </MudButton>
 
-@if (customers == null)
+@if (customerListObjects == null)
 {
     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 else
 {
-    <MudTable Items="customers" Hover="true" SortLabel="Sort By" Elevation="0">
+    <MudTable Items="customerListObjects" Hover="true" SortLabel="Sort By" Elevation="0">
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
-            <MudTd DataLabel="Name">@context.Name</MudTd>
-            <MudTd DataLabel="Address">@context.Address</MudTd>
-            <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
-            <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
-            <MudTd DataLabel="Holdings">@context.Holdings</MudTd>
-            <MudButton @onclick="(() => OpenModifyOrCreateCustomer(context))" Variant="Variant.Filled" Color="Color.Primary">
-                Update
-            </MudButton>
-        </RowTemplate>
-        <PagerContent>
-            <MudTablePager PageSizeOptions="new int[]{50, 100}" />
-        </PagerContent>
-    </MudTable>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Address">@context.Address</MudTd>
+                <MudTd DataLabel="Created">@context.CreatedAt</MudTd>
+                <MudTd DataLabel="Updated">@context.UpdatedAt</MudTd>
+                <MudTd DataLabel="Holdings">@context.Holdings</MudTd>
+                <MudButton @onclick="(() => OpenModifyOrCreateCustomer(context))" Variant="Variant.Filled" Color="Color.Primary">
+                    Update
+                </MudButton>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[]{50, 100}" />
+            </PagerContent>
+        </MudTable>
 }
 @code {
-    private IEnumerable<Customer>? customers;
+    private IEnumerable<CustomerObject>? customerListObjects;
     public DateTime? selectedTime = DateTime.Now.Date.AddDays(1);
 
-    private async Task OpenModifyOrCreateCustomer(Customer? existing = null)
+    private async Task OpenModifyOrCreateCustomer(CustomerObject? existing = null)
     {
         var parameters = new DialogParameters();
         parameters.Add("CustomerName", existing?.Name);
@@ -67,7 +68,21 @@ else
 
     private void RefreshList()
     {
-        customers = CustomerService.Get(selectedTime);
+        var customers = CustomerService.Get(selectedTime);
+        customerListObjects = customers.Select(c =>
+        {
+
+            var holdingsString = "";
+            foreach (var (id, amount) in c.Holdings)
+            {
+                var fruit = FruitService.Get(id, selectedTime);
+                if (fruit != null)
+                {
+                    holdingsString += $"{fruit.Name}: {amount}\n";
+                }
+            }
+            return new CustomerObject(c.Id, c.Name, c.Address, holdingsString, c.CreatedAt, c.UpdatedAt);
+        });
     }
 
     void OnDateChange(DateTime? newDate)
@@ -78,8 +93,9 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
         await Task.Delay(500);
         RefreshList();
     }
+
+    private record CustomerObject(Guid Id, string Name, string Address, string Holdings, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt);
 }
