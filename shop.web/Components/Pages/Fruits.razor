@@ -11,7 +11,7 @@
 <PageTitle>Fruits</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Fruits</MudText>
-<MudDatePicker Label="Fruits at date:" DateChanged="OnDateChange" />
+<DateTimePicker Label="Customers at date:" ValueChanged="OnDateChange" />
 
 <MudButton @onclick="(() => OpenModifyOrCreateFruit(null))" Variant="Variant.Filled" Color="Color.Primary">
     New Fruit
@@ -54,7 +54,7 @@ else
 
 @code {
     private IEnumerable<Fruit>? fruits;
-    public DateTime? selectedTime = DateTime.Now.Date.AddDays(1);
+    public DateTimeOffset? selectedTime = DateTime.Now.Date.AddDays(1);
 
     private async Task OpenModifyOrCreateFruit(Fruit? existing = null)
     {
@@ -112,9 +112,9 @@ else
         fruits = FruitService.Get(selectedTime).Where(f => f.State != eventsourcing.State.Deleted);
     }
 
-    void OnDateChange(DateTime? newDate)
+    async Task OnDateChange(DateTimeOffset newDate)
     {
-        selectedTime = newDate!.Value.Date.AddDays(1);
+        selectedTime = newDate;
         RefreshList();
     }
 
