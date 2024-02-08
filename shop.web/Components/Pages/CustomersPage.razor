@@ -6,6 +6,7 @@
 @inject IEventBus EventBus
 @inject IDialogService DialogService
 @inject IQueryService<Customer> CustomerQueryService
+@inject IQueryService<Fruit> FruitQueryService
 @inject IReadModelRefresher<Customer> CustomerRefresher
 
 <MyMudProviders />
@@ -19,13 +20,13 @@
     New Customer
 </MudButton>
 
-@if (customers == null)
+@if (customerListObjects == null)
 {
     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 else
 {
-    <MudTable Items="customers" Hover="true" SortLabel="Sort By" Elevation="0">
+    <MudTable Items="customerListObjects" Hover="true" SortLabel="Sort By" Elevation="0">
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
             <MudTd DataLabel="Name">@context.Name</MudTd>
@@ -48,10 +49,10 @@ else
     </MudButton>
 }
 @code {
-    private IEnumerable<Customer>? customers;
+    private IEnumerable<CustomerObject>? customerListObjects;
     public DateTime? selectedTime = DateTime.Now.Date.AddDays(1);
 
-    private async Task OpenModifyOrCreateCustomer(Customer? existing = null)
+    private async Task OpenModifyOrCreateCustomer(CustomerObject? existing = null)
     {
         var parameters = new DialogParameters();
         parameters.Add("CustomerName", existing?.Name);
@@ -81,7 +82,21 @@ else
 
     private async Task RefreshList()
     {
-        customers = await Task.FromResult(CustomerQueryService.Get(selectedTime));
+        var customers = await Task.FromResult(CustomerQueryService.Get(selectedTime));
+        customerListObjects = customers.Select(c =>
+        {
+
+            var holdingsString = "";
+            foreach (var (id, amount) in c.Holdings)
+            {
+                var fruit = FruitQueryService.Get(id, selectedTime);
+                if (fruit != null)
+                {
+                    holdingsString += $"{fruit.Name}: {amount}\n";
+                }
+            }
+            return new CustomerObject(c.Id, c.Name, c.Address, holdingsString, c.CreatedAt, c.UpdatedAt);
+        });
     }
 
     private async Task OnDateChange(DateTime? newDate)
@@ -105,4 +120,6 @@ else
         });
         await RefreshList();
     }
+
+    private record CustomerObject(Guid Id, string Name, string Address, string Holdings, DateTimeOffset CreatedAt, DateTimeOffset UpdatedAt);
 }
